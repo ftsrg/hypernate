@@ -41,9 +41,8 @@ public final class MethodLogger {
     return "%s,%s".formatted(ctx.toString(), generateParamsString(params));
   }
 
-  public <Type extends SerializableEntity<Type>> String generateParamsString(
-      final Context ctx, final Type obj) {
-    return "%s,%s".formatted(ctx.toString(), obj.toString());
+  public <Type extends SerializableEntity<Type>> String generateParamsString(final Type obj) {
+    return obj.toString();
   }
 
   public void logStart(final String methodName, final String paramsString) {
