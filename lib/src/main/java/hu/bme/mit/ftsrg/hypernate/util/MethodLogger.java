@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.util;
 
 import hu.bme.mit.ftsrg.hypernate.entity.SerializableEntity;

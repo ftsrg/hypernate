@@ -86,10 +86,12 @@ configure<SpotlessExtension> {
     googleJavaFormat()
     formatAnnotations()
     toggleOffOn()
+    licenseHeader("/* SPDX-License-Identifier: Apache-2.0 */", "package ")
   }
   kotlin {
     target("src/*/kotlin/**/*.kt", "buildSrc/src/*/kotlin/**/*.kt")
     ktfmt()
+    licenseHeader("/* SPDX-License-Identifier: Apache-2.0 */", "package ")
   }
   kotlinGradle { ktfmt() }
 }
