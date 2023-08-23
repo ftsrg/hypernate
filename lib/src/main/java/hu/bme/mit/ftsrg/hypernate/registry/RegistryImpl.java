@@ -6,6 +6,7 @@ import hu.bme.mit.ftsrg.hypernate.entity.EntityExistsException;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityFactory;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityNotFoundException;
 import hu.bme.mit.ftsrg.hypernate.entity.SerializableEntity;
+import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
 import hu.bme.mit.ftsrg.hypernate.util.MethodLogger;
 import java.util.*;
 import org.hyperledger.fabric.contract.Context;
@@ -36,7 +37,7 @@ public class RegistryImpl implements Registry {
 
   @Override
   public <Type extends SerializableEntity<Type>> void create(final Context ctx, final Type entity)
-      throws EntityExistsException {
+      throws EntityExistsException, SerializationException {
     final String paramsString = methodLogger.generateParamsString(ctx, entity);
     methodLogger.logStart("create", paramsString);
 
@@ -52,7 +53,7 @@ public class RegistryImpl implements Registry {
 
   @Override
   public <Type extends SerializableEntity<Type>> void update(final Context ctx, final Type entity)
-      throws EntityNotFoundException {
+      throws EntityNotFoundException, SerializationException {
     final String paramsString = methodLogger.generateParamsString(ctx, entity);
     methodLogger.logStart("update", paramsString);
 
@@ -83,7 +84,7 @@ public class RegistryImpl implements Registry {
 
   @Override
   public <Type extends SerializableEntity<Type>> Type read(final Context ctx, final Type target)
-      throws EntityNotFoundException {
+      throws EntityNotFoundException, SerializationException {
     final String paramsString = methodLogger.generateParamsString(ctx, target);
     methodLogger.logStart("read", paramsString);
 
@@ -95,15 +96,15 @@ public class RegistryImpl implements Registry {
     if (data == null || data.length == 0) throw new EntityNotFoundException(key);
 
     target.fromBuffer(data);
-    logger.debug("Deserialized entity from data; JSON representation={}", target.toJson());
+    logger.debug("Deserialized entity from data", target);
 
-    methodLogger.logEnd("read", paramsString, target.toJson());
+    methodLogger.logEnd("read", paramsString, target.toString());
     return target;
   }
 
   @Override
   public <Type extends SerializableEntity<Type>> List<Type> readAll(
-      final Context ctx, final Type template) {
+      final Context ctx, final Type template) throws SerializationException {
     final String paramsString = methodLogger.generateParamsString(ctx, template);
     methodLogger.logStart("readAll", paramsString);
 
@@ -116,7 +117,7 @@ public class RegistryImpl implements Registry {
       final EntityFactory<Type> factory = template.getFactory();
       final Type entity = factory.create();
       entity.fromBuffer(value);
-      logger.debug("Deserialized entity from data; JSON representation={}", entity.toJson());
+      logger.debug("Deserialized entity from data", entity);
       entities.add(entity);
     }
     logger.debug("Found {} entities in total for partial key={}", entities.size(), compositeKey);
@@ -127,7 +128,7 @@ public class RegistryImpl implements Registry {
 
   @Override
   public <Type extends SerializableEntity<Type>> SelectionBuilder<Type> select(
-      final Context ctx, final Type template) {
+      final Context ctx, final Type template) throws SerializationException {
     final String paramsString = methodLogger.generateParamsString(ctx, template);
     methodLogger.logStart("select", paramsString);
 
@@ -168,7 +169,7 @@ public class RegistryImpl implements Registry {
     public SelectionBuilder<Type> matching(final Matcher<Type> matcher) {
       final List<Type> newSelection = new ArrayList<>();
       for (Type entity : this.selection) {
-        logger.debug("Testing matcher on entity (JSON): {}", entity.toJson());
+        logger.debug("Testing matcher on entity", entity);
         if (matcher.match(entity)) {
           logger.debug("Entity matches");
           newSelection.add(entity);
@@ -206,7 +207,7 @@ public class RegistryImpl implements Registry {
       }
 
       final Type first = this.selection.get(0);
-      logger.debug("Returning the first entity in selection (JSON): {}", first.toJson());
+      logger.debug("Returning the first entity in selection", first);
       return first;
     }
   }

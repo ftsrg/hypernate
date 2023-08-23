@@ -38,10 +38,11 @@ public interface SerializableEntity<Type extends SerializableEntity<Type>> {
    * encoded version of {@link SerializableEntity#toJson()}.
    *
    * @return this entity serialized into a byte array
+   * @throws SerializationException if the object cannot be serialized into a JSON string
    * @see SerializableEntity#fromBuffer(byte[])
    * @see SerializableEntityBase#toBuffer()
    */
-  byte[] toBuffer();
+  byte[] toBuffer() throws SerializationException;
 
   /**
    * Deserialize this entity from a byte array.
@@ -49,19 +50,21 @@ public interface SerializableEntity<Type extends SerializableEntity<Type>> {
    * <p>Naturally, this should do the inverse of {@link SerializableEntity#toBuffer()}
    *
    * @param buffer the buffer to parse
+   * @throws SerializationException if the JSON decoded from the byte array cannot be deserialized
    * @see SerializableEntity#toBuffer()
    * @see SerializableEntityBase#fromBuffer(byte[])
    */
-  void fromBuffer(byte[] buffer);
+  void fromBuffer(byte[] buffer) throws SerializationException;
 
   /**
    * Serialize this entity into a JSON string.
    *
    * @return this entity serialized into a JSON string
+   * @throws SerializationException if the object cannot be serialized into a JSON string
    * @see SerializableEntity#fromJson(String)
    * @see SerializableEntityBase#toJson()
    */
-  String toJson();
+  String toJson() throws SerializationException;
 
   /**
    * Deserialize this entity from a JSON string.
@@ -69,10 +72,11 @@ public interface SerializableEntity<Type extends SerializableEntity<Type>> {
    * <p>Naturally, this should do the inverse of {@link SerializableEntity#toJson()}
    *
    * @param json the JSON string to parse
+   * @throws SerializationException if the object cannot be deserialized from the JSON string
    * @see SerializableEntity#toJson()
    * @see SerializableEntityBase#fromJson(String)
    */
-  void fromJson(String json);
+  void fromJson(String json) throws SerializationException;
 
   /**
    * Get a factory for this entity type.

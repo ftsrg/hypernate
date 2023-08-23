@@ -34,7 +34,7 @@ repositories {
 
 dependencies {
   implementation("ch.qos.logback:logback-classic:1.4.11")
-  implementation("com.google.code.gson:gson:2.10.1")
+  implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
   implementation("com.jcabi:jcabi-aspects:0.25.1")
   implementation("org.aspectj:aspectjrt:1.9.20")
   implementation("org.aspectj:aspectjweaver:1.9.20")
