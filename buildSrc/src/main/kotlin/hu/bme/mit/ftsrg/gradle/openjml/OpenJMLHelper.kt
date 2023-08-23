@@ -1,4 +1,4 @@
-package hu.bme.mit.ftsrg.openjmlhelper
+package hu.bme.mit.ftsrg.gradle.openjml
 
 import java.io.File
 import java.net.URL
@@ -117,6 +117,7 @@ internal fun replaceExecutable(
 
   logger.lifecycle("🔄 Replacing $name at $target with jmlavac at $with...")
   target.renameTo(backupFile)
+  backupFile.setExecutable(true, true)
   with.copyTo(target)
   target.setExecutable(true, true)
   logger.lifecycle("✅ $name replaced (original is $backupFile)")
