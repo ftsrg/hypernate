@@ -54,6 +54,23 @@ tasks.withType<JavaCompile> {
   options.compilerArgs.addAll(listOf("-Xlint:unchecked", "-Xlint:deprecation"))
 }
 
+tasks.register("initOpenJML") {
+  val openJMLVersion: String by project
+
+  val zipFile: File = downloadDir.get().file("openjml.zip").asFile
+  downloadOpenJML(openJMLVersion, zipFile, logger)
+  extractOpenJML(zipFile, openJMLDir, logger)
+
+  // `jmlavac' is what we call `javac' that is actually
+  // OpenJML's javac; likewise, `jmlava' is a wrapper for `java' with
+  // OpenJML already in the classpath
+  generateJmlavac(jmlavac.asFile, openJMLJavaHomeDir, logger)
+  replaceJavac(openJMLJavaHomeDir, jmlavac.asFile, logger)
+  generateJmlava(jmlava.asFile, openJMLJavaHomeDir, logger)
+  replaceJava(openJMLJavaHomeDir, jmlava.asFile, logger)
+  logger.lifecycle("✅ OpenJML successfully initialized in $openJMLDir")
+}
+
 if (!noOpenJML) {
   tasks.named<ShadowJar>("shadowJar") { dependsOn(tasks.named("initOpenJML")) }
 
@@ -106,21 +123,4 @@ configure<SpotlessExtension> {
     licenseHeader("/* SPDX-License-Identifier: Apache-2.0 */", "package ")
   }
   kotlinGradle { ktfmt() }
-}
-
-tasks.register("initOpenJML") {
-  val openJMLVersion: String by project
-
-  val zipFile: File = downloadDir.get().file("openjml.zip").asFile
-  downloadOpenJML(openJMLVersion, zipFile, logger)
-  extractOpenJML(zipFile, openJMLDir, logger)
-
-  // `jmlavac' is what we call `javac' that is actually
-  // OpenJML's javac; likewise, `jmlava' is a wrapper for `java' with
-  // OpenJML already in the classpath
-  generateJmlavac(jmlavac.asFile, openJMLJavaHomeDir, logger)
-  replaceJavac(openJMLJavaHomeDir, jmlavac.asFile, logger)
-  generateJmlava(jmlava.asFile, openJMLJavaHomeDir, logger)
-  replaceJava(openJMLJavaHomeDir, jmlava.asFile, logger)
-  logger.lifecycle("✅ OpenJML successfully initialized in $openJMLDir")
 }
