@@ -44,10 +44,11 @@ public abstract class SerializableEntityBase<Type extends SerializableEntity<Typ
    * Serializes this entity to a JSON and then to a byte array.
    *
    * @return This entity, serialized into a JSON string and then converted to a UTF-8 byte array.
+   * @throws SerializationException if the object cannot be serialized into a JSON string
    * @see SerializableEntity#toBuffer()
    */
   @Override
-  public byte[] toBuffer() {
+  public byte[] toBuffer() throws SerializationException {
     final String json = this.toJson();
     final byte[] buffer = json.getBytes(StandardCharsets.UTF_8);
     logger.debug("Returning buffer (size={}) from JSON: {}", buffer.length, json);
@@ -58,10 +59,11 @@ public abstract class SerializableEntityBase<Type extends SerializableEntity<Typ
    * Deserializes this entity from a byte array.
    *
    * @param buffer the buffer to parse
+   * @throws SerializationException if the JSON decoded from the byte array cannot be deserialized
    * @see SerializableEntityBase#toBuffer()
    */
   @Override
-  public void fromBuffer(final byte[] buffer) {
+  public void fromBuffer(final byte[] buffer) throws SerializationException {
     final String json = new String(buffer, StandardCharsets.UTF_8);
     logger.debug("Parsing entity from JSON: {}", json);
     this.fromJson(json);
@@ -71,10 +73,11 @@ public abstract class SerializableEntityBase<Type extends SerializableEntity<Typ
    * Serializes this entity into a JSON.
    *
    * @return this entity as a JSON string
+   * @throws SerializationException if the object cannot be serialized into a JSON string
    * @see SerializableEntity#toJson()
    */
   @Override
-  public String toJson() {
+  public String toJson() throws SerializationException {
     final String json = JSON.serialize(this);
     logger.debug("Returning JSON string from entity: {}", json);
     return json;
@@ -88,10 +91,11 @@ public abstract class SerializableEntityBase<Type extends SerializableEntity<Typ
    * ignored.
    *
    * @param json the JSON string to parse
+   * @throws SerializationException if the object cannot be deserialized from the JSON string
    * @see SerializableEntityBase#toJson()
    */
   @Override
-  public void fromJson(final String json) {
+  public void fromJson(final String json) throws SerializationException {
     logger.debug("Deserializing from JSON string: {}...", json);
     final Object obj = JSON.deserialize(json, this.getClass());
     final Field[] ourFields = this.getClass().getDeclaredFields();
