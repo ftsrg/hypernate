@@ -2,10 +2,10 @@
 package hu.bme.mit.ftsrg.hypernate;
 
 import com.jcabi.aspects.Loggable;
+import hu.bme.mit.ftsrg.hypernate.entity.Entity;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityExistsException;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityFactory;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityNotFoundException;
-import hu.bme.mit.ftsrg.hypernate.entity.SerializableEntity;
 import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
 import hu.bme.mit.ftsrg.hypernate.util.MethodLogger;
 import java.util.*;
@@ -28,7 +28,7 @@ public class Registry {
     this.stub = stub;
   }
 
-  public <Type extends SerializableEntity<Type>> void create(final Type entity)
+  public <Type extends Entity<Type>> void create(final Type entity)
       throws EntityExistsException, SerializationException {
     final String paramsString = methodLogger.generateParamsString(entity);
     methodLogger.logStart("create", paramsString);
@@ -43,7 +43,7 @@ public class Registry {
     methodLogger.logEnd("create", paramsString, "<void>");
   }
 
-  public <Type extends SerializableEntity<Type>> void update(final Type entity)
+  public <Type extends Entity<Type>> void update(final Type entity)
       throws EntityNotFoundException, SerializationException {
     final String paramsString = methodLogger.generateParamsString(entity);
     methodLogger.logStart("update", paramsString);
@@ -58,8 +58,7 @@ public class Registry {
     methodLogger.logEnd("update", paramsString, "<void>");
   }
 
-  public <Type extends SerializableEntity<Type>> void delete(final Type entity)
-      throws EntityNotFoundException {
+  public <Type extends Entity<Type>> void delete(final Type entity) throws EntityNotFoundException {
     final String paramsString = methodLogger.generateParamsString(entity);
     methodLogger.logStart("delete", paramsString);
 
@@ -72,7 +71,7 @@ public class Registry {
     methodLogger.logEnd("delete", paramsString, "<void>");
   }
 
-  public <Type extends SerializableEntity<Type>> Type read(final Type target)
+  public <Type extends Entity<Type>> Type read(final Type target)
       throws EntityNotFoundException, SerializationException {
     final String paramsString = methodLogger.generateParamsString(target);
     methodLogger.logStart("read", paramsString);
@@ -93,7 +92,7 @@ public class Registry {
     return target;
   }
 
-  public <Type extends SerializableEntity<Type>> List<Type> readAll(final Type template)
+  public <Type extends Entity<Type>> List<Type> readAll(final Type template)
       throws SerializationException {
     final String paramsString = methodLogger.generateParamsString(template);
     methodLogger.logStart("readAll", paramsString);
@@ -116,7 +115,7 @@ public class Registry {
     return entities;
   }
 
-  public <Type extends SerializableEntity<Type>> SelectionBuilder<Type> select(final Type template)
+  public <Type extends Entity<Type>> SelectionBuilder<Type> select(final Type template)
       throws SerializationException {
     final String paramsString = methodLogger.generateParamsString(template);
     methodLogger.logStart("select", paramsString);
@@ -131,25 +130,25 @@ public class Registry {
     return valueOnLedger != null && valueOnLedger.length > 0;
   }
 
-  private <Type extends SerializableEntity<Type>> boolean exists(final Type obj) {
+  private <Type extends Entity<Type>> boolean exists(final Type obj) {
     return keyExists(getKey(obj));
   }
 
-  private <Type extends SerializableEntity<Type>> void assertNotExists(final Type obj)
+  private <Type extends Entity<Type>> void assertNotExists(final Type obj)
       throws EntityExistsException {
     if (exists(obj)) {
       throw new EntityExistsException(getKey(obj));
     }
   }
 
-  private <Type extends SerializableEntity<Type>> void assertExists(final Type obj)
+  private <Type extends Entity<Type>> void assertExists(final Type obj)
       throws EntityNotFoundException {
     if (!exists(obj)) {
       throw new EntityNotFoundException(getKey(obj));
     }
   }
 
-  private <Type extends SerializableEntity<Type>> String getKey(final Type obj) {
+  private <Type extends Entity<Type>> String getKey(final Type obj) {
     final String paramsString = methodLogger.generateParamsString(obj);
     methodLogger.logStart("getKey", paramsString);
 
@@ -159,7 +158,7 @@ public class Registry {
     return compositeKey.toString();
   }
 
-  public static final class SelectionBuilder<Type extends SerializableEntity<Type>> {
+  public static final class SelectionBuilder<Type extends Entity<Type>> {
 
     private List<Type> selection;
 
@@ -211,7 +210,7 @@ public class Registry {
     }
   }
 
-  public interface Matcher<Type extends SerializableEntity<Type>> {
+  public interface Matcher<Type extends Entity<Type>> {
 
     boolean match(Type entity);
   }

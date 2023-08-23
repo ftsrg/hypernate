@@ -12,43 +12,82 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base class for {@link SerializableEntity} entities.
+ * A generic database entity that can be serialized to JSON and to byte arrays.
  *
- * <p>This class provides some reflection-based implementations of the {@link SerializableEntity}
- * methods, so that you do not have to implement all the boilerplate yourself in the final entity
- * classes.
+ * <p>The default method implementations provide some reflection-based implementations, so that you
+ * do not have to implement all the boilerplate yourself in the actual entity classes.
  *
- * @param <Type> the type of the entity
+ * @param <Type> the type of the entity (required because of {@link Entity#getFactory()})
  */
 @EqualsAndHashCode
 @DataType
-public abstract class SerializableEntityBase<Type extends SerializableEntity<Type>>
-    implements SerializableEntity<Type> {
+public interface Entity<Type extends Entity<Type>> {
 
-  private static final Logger logger = LoggerFactory.getLogger(SerializableEntityBase.class);
+  static final Logger logger = LoggerFactory.getLogger(Entity.class);
+
+  static final int padLength = Integer.toString(Integer.MAX_VALUE).length();
 
   /**
-   * Returns the entity type name, which is its class's name in all-uppercase.
+   * Get the type of this entity; essentially a table name.
    *
-   * @return The name of the class of this entity, in all-uppercase
-   * @see SerializableEntity#getType()
+   * <p>The default is an all-caps string, such as <code>CUSTOMER</code>.
+   *
+   * @return the arbitrary identifier of this entity type
+   * @see Entity#getType()
    */
-  @Override
-  public String getType() {
+  default String getType() {
     final String type = this.getClass().getName().toUpperCase();
     logger.debug("Returning type name: {}", type);
     return type;
   }
 
   /**
-   * Serializes this entity to a JSON and then to a byte array.
+   * Get the composite key for this entity.
    *
-   * @return This entity, serialized into a JSON string and then converted to a UTF-8 byte array.
-   * @throws SerializationException if the object cannot be serialized into a JSON string
-   * @see SerializableEntity#toBuffer()
+   * <p>The composite key is an array of strings comprising the primary key fields of the entity (ie
+   * those annotated with {@link KeyPart}).
+   *
+   * <p>The default implementation takes all fields annotated with {@link KeyPart} in the entity
+   * class, pads them to {@link Entity#padLength} and creates an array from those.
+   *
+   * <p><b>WARNING:</b> the order of keys might matter; this default implementation has not been
+   * tested.
+   *
+   * @return the composite key of this entity
+   * @see Entity#getKeyParts()
    */
-  @Override
-  public byte[] toBuffer() throws SerializationException {
+  default String[] getKeyParts() {
+    // Stream-based implementation replaced with code below to accommodate OpenJML...
+    final List<String> keyParts = new ArrayList<>();
+    for (final Field field : this.getClass().getDeclaredFields()) {
+      logger.debug("Checking if field {} is a key part...", field.getName());
+      field.setAccessible(true);
+      if (field.isAnnotationPresent(KeyPart.class)) {
+        logger.debug("Field {} seems to be a key part; getting its value", field.getName());
+        try {
+          keyParts.add(pad(field.getInt(this)));
+        } catch (IllegalAccessException e) {
+          logger.error("Failed to get the value of a key part", e);
+          throw new RuntimeException(e);
+        }
+      }
+    }
+
+    logger.debug("Returning key parts for entity: {}", keyParts);
+    return keyParts.toArray(new String[0]);
+  }
+
+  /**
+   * Serialize this entity into a byte array.
+   *
+   * <p>The default implementation is the encoded version of {@link Entity#toJson()}.
+   *
+   * @return this entity serialized into a byte array
+   * @throws SerializationException if the object cannot be serialized into a JSON string
+   * @see Entity#fromBuffer(byte[])
+   * @see Entity#toBuffer()
+   */
+  default byte[] toBuffer() throws SerializationException {
     final String json = this.toJson();
     final byte[] buffer = json.getBytes(StandardCharsets.UTF_8);
     logger.debug("Returning buffer (size={}) from JSON: {}", buffer.length, json);
@@ -56,46 +95,48 @@ public abstract class SerializableEntityBase<Type extends SerializableEntity<Typ
   }
 
   /**
-   * Deserializes this entity from a byte array.
+   * Deserialize this entity from a byte array.
+   *
+   * <p>The default implementation expects an encoded JSON string.
    *
    * @param buffer the buffer to parse
    * @throws SerializationException if the JSON decoded from the byte array cannot be deserialized
-   * @see SerializableEntityBase#toBuffer()
+   * @see Entity#toBuffer()
+   * @see Entity#fromBuffer(byte[])
    */
-  @Override
-  public void fromBuffer(final byte[] buffer) throws SerializationException {
+  default void fromBuffer(byte[] buffer) throws SerializationException {
     final String json = new String(buffer, StandardCharsets.UTF_8);
     logger.debug("Parsing entity from JSON: {}", json);
     this.fromJson(json);
   }
 
   /**
-   * Serializes this entity into a JSON.
+   * Serialize this entity into a JSON string.
    *
-   * @return this entity as a JSON string
+   * @return this entity serialized into a JSON string
    * @throws SerializationException if the object cannot be serialized into a JSON string
-   * @see SerializableEntity#toJson()
+   * @see Entity#fromJson(String)
+   * @see Entity#toJson()
    */
-  @Override
-  public String toJson() throws SerializationException {
+  default String toJson() throws SerializationException {
     final String json = JSON.serialize(this);
     logger.debug("Returning JSON string from entity: {}", json);
     return json;
   }
 
   /**
-   * Deserializes this entity from a JSON.
+   * Deserialize this entity from a JSON string.
    *
-   * <p>This reflection-based implementation sets all fields with matching names from the JSON.
-   * Fields that are not found in the JSON remain unset. Conversely, extraneous keys in the JSON are
-   * ignored.
+   * <p>The reflection-based default implementation sets all fields with matching names from the
+   * JSON. Fields that are not found in the JSON remain unset. Conversely, extraneous keys in the
+   * JSON are ignored.
    *
    * @param json the JSON string to parse
    * @throws SerializationException if the object cannot be deserialized from the JSON string
-   * @see SerializableEntityBase#toJson()
+   * @see Entity#toJson()
+   * @see Entity#fromJson(String)
    */
-  @Override
-  public void fromJson(final String json) throws SerializationException {
+  default void fromJson(String json) throws SerializationException {
     logger.debug("Deserializing from JSON string: {}...", json);
     final Object obj = JSON.deserialize(json, this.getClass());
     final Field[] ourFields = this.getClass().getDeclaredFields();
@@ -126,48 +167,16 @@ public abstract class SerializableEntityBase<Type extends SerializableEntity<Typ
   }
 
   /**
-   * Get the composite key for this entity.
+   * Get a factory for this entity type.
    *
-   * <p>This reference implementation takes all fields annotated with {@link KeyPart} in the entity
-   * class, pads them to {@link SerializableEntityBase#padLength} and creates an array from those.
-   *
-   * <p><b>WARNING:</b> the order of keys might matter; this implementation has not been tested.
-   *
-   * @return the composite key of this entity
-   */
-  @Override
-  public String[] getKeyParts() {
-    // Stream-based implementation replaced with code below to accommodate OpenJML...
-    final List<String> keyParts = new ArrayList<>();
-    for (final Field field : this.getClass().getDeclaredFields()) {
-      logger.debug("Checking if field {} is a key part...", field.getName());
-      field.setAccessible(true);
-      if (field.isAnnotationPresent(KeyPart.class)) {
-        logger.debug("Field {} seems to be a key part; getting its value", field.getName());
-        try {
-          keyParts.add(pad(field.getInt(this)));
-        } catch (IllegalAccessException e) {
-          logger.error("Failed to get the value of a key part", e);
-          throw new RuntimeException(e);
-        }
-      }
-    }
-
-    logger.debug("Returning key parts for entity: {}", keyParts);
-    return keyParts.toArray(new String[0]);
-  }
-
-  /**
-   * Get a factory that can instantiate this entity.
-   *
-   * <p><b>WARNING:</b> this is a rather lousy reflection-based implementation that has not been
+   * <p><b>WARNING:</b> the rather lousy default reflection-based implementation that has not been
    * tested
    *
-   * @return a {@link EntityFactory} for this entity type
+   * @return A factory that can be used to create empty instances of this entity
+   * @see Entity#getFactory()
    */
-  @Override
-  public EntityFactory<Type> getFactory() {
-    final Class<? extends SerializableEntityBase> ourClass = this.getClass();
+  default EntityFactory<Type> getFactory() {
+    final Class<? extends Entity> ourClass = this.getClass();
     // Lambda-based implementation replaced with code below to accommodate OpenJML...
     return new EntityFactory<>() {
       @Override
@@ -185,8 +194,6 @@ public abstract class SerializableEntityBase<Type extends SerializableEntity<Typ
       }
     };
   }
-
-  private static final int padLength = Integer.toString(Integer.MAX_VALUE).length();
 
   /**
    * Converts the number to text and pads it to a fix length.

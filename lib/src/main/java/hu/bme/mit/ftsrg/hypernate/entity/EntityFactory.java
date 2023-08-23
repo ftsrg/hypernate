@@ -6,7 +6,7 @@ package hu.bme.mit.ftsrg.hypernate.entity;
  *
  * @param <Type> the entity's type
  */
-public interface EntityFactory<Type extends SerializableEntity<Type>> {
+public interface EntityFactory<Type extends Entity<Type>> {
   /**
    * Simply gives a new, empty instance of the entity of type <code>Type</code>.
    *
