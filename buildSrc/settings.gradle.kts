@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "toolkit"
+rootProject.name = "gradle-openjml"

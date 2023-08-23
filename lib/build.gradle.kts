@@ -1,21 +1,26 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+
 /* Originally based on https://github.com/mingyang91/openjml-template */
 
 import com.diffplug.gradle.spotless.SpotlessExtension
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import hu.bme.mit.ftsrg.openjmlhelper.*
+import hu.bme.mit.ftsrg.gradle.openjml.*
 import java.io.File
 
-val openJMLDir = layout.projectDirectory.dir(".openjml")
-val openJMLJavaHomeDir = openJMLDir.dir("jdk")
-val downloadDir = layout.buildDirectory.dir("tmp/download")
+val openJMLDir: Directory = layout.projectDirectory.dir(".openjml")
+val openJMLJavaHomeDir: Directory = openJMLDir.dir("jdk")
+val downloadDir: Provider<Directory> = layout.buildDirectory.dir("tmp/download")
 
-val jmlavac = openJMLJavaHomeDir.file("bin/jmlavac")
-val jmlava = openJMLJavaHomeDir.file("bin/jmlava")
+val jmlavac: RegularFile = openJMLJavaHomeDir.file("bin/jmlavac")
+val jmlava: RegularFile = openJMLJavaHomeDir.file("bin/jmlava")
+
+val withoutOpenJML: String? by project
+val noOpenJML: Boolean = withoutOpenJML != null && withoutOpenJML.toBoolean() == true
 
 plugins {
-  application
-  id("com.github.johnrengelman.shadow") version "7.1.2"
-  id("com.diffplug.spotless") version "6.19.0"
+  `java-library`
+  id("com.github.johnrengelman.shadow") version "8.1.1"
+  id("com.diffplug.spotless") version "6.20.0"
 }
 
 group = "hu.bme.mit.ftsrg"
@@ -28,64 +33,51 @@ repositories {
 }
 
 dependencies {
-  implementation("ch.qos.logback:logback-classic:1.4.8")
+  implementation("ch.qos.logback:logback-classic:1.4.11")
   implementation("com.google.code.gson:gson:2.10.1")
   implementation("com.jcabi:jcabi-aspects:0.25.1")
-  implementation("org.aspectj:aspectjrt:1.9.19")
-  implementation("org.aspectj:aspectjweaver:1.9.19")
+  implementation("org.aspectj:aspectjrt:1.9.20")
+  implementation("org.aspectj:aspectjweaver:1.9.20")
   implementation("org.hyperledger.fabric-chaincode-java:fabric-chaincode-shim:2.5.0")
   implementation("org.hyperledger.fabric:fabric-protos:0.3.0")
-  implementation("org.json:json:20230227")
   implementation("org.projectlombok:lombok:1.18.28")
-  // Included also as implementation dependency so shadow will package it
-  implementation(files("$openJMLDir/jmlruntime.jar"))
 
-  testImplementation("org.assertj:assertj-core:3.11.1")
-  testImplementation("org.junit.jupiter:junit-jupiter:5.4.2")
-  testImplementation("org.mockito:mockito-core:2.28.2")
+  testImplementation("org.assertj:assertj-core:3.24.2")
+  testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+  testImplementation("org.mockito:mockito-core:5.4.0")
   testImplementation(files("$openJMLDir/jmlruntime.jar"))
 }
 
-application { mainClass.set("org.hyperledger.fabric.contract.ContractRouter") }
+if (!noOpenJML) {
+  tasks.named<ShadowJar>("shadowJar") { dependsOn(tasks.named("initOpenJML")) }
 
-tasks.named<ShadowJar>("shadowJar") {
-  dependsOn(tasks.named("initOpenJML"))
+  tasks.test { java { jvmArgs = listOf("-Dorg.jmlspecs.openjml.rac=exception") } }
 
-  archiveBaseName.set("chaincode")
-  archiveClassifier.set("")
-  archiveVersion.set("")
-}
-
-tasks.named<Test>("test") { useJUnitPlatform() }
-
-tasks.test {
-  java {
-    executable = "$openJMLDir/bin/jmlava"
-    jvmArgs = listOf("-Dorg.jmlspecs.openjml.rac=exception")
+  tasks.withType<JavaCompile>().configureEach {
+    dependsOn(tasks.named("initOpenJML"))
+    // Only when not compiling because of Spotless
+    if (!gradle.startParameter.taskNames.any { it.contains("spotlessApply") }) {
+      val mode =
+          when (System.getenv("JML_MODE")) {
+            "esc" -> "esc"
+            else -> "rac"
+          }
+      options.isFork = true
+      options.compilerArgs.addAll(
+          listOf(
+              "-jml",
+              "-$mode",
+              "-timeout",
+              "30",
+              "--nullable-by-default",
+              "--specs-path",
+              "specs/"))
+      options.forkOptions.javaHome = openJMLJavaHomeDir.asFile
+    }
   }
 }
 
-// java {
-//   sourceCompatibility = JavaVersion.VERSION_17
-//   targetCompatibility = JavaVersion.VERSION_17
-// }
-
-tasks.withType<JavaCompile>().configureEach {
-  dependsOn(tasks.named("initOpenJML"))
-  // Only when not compiling because of Spotless
-  if (!gradle.startParameter.taskNames.any { it.contains("spotlessApply") }) {
-    val mode =
-        when (System.getenv("JML_MODE")) {
-          "esc" -> "esc"
-          else -> "rac"
-        }
-    options.isFork = true
-    options.compilerArgs.addAll(
-        listOf(
-            "-jml", "-$mode", "-timeout", "30", "--nullable-by-default", "--specs-path", "specs/"))
-    options.forkOptions.javaHome = openJMLJavaHomeDir.asFile
-  }
-}
+tasks.test { useJUnitPlatform() }
 
 configure<SpotlessExtension> {
   java {
