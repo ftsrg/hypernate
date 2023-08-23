@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.context;
 
 import hu.bme.mit.ftsrg.hypernate.middleware.LoggingStubMiddleware;

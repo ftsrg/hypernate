@@ -1,5 +1,4 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-
 package hu.bme.mit.ftsrg.hypernate.util;
 
 import com.google.gson.Gson;
