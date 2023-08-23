@@ -50,6 +50,10 @@ dependencies {
   testImplementation(files("$openJMLDir/jmlruntime.jar"))
 }
 
+tasks.withType<JavaCompile> {
+  options.compilerArgs.addAll(listOf("-Xlint:unchecked", "-Xlint:deprecation"))
+}
+
 if (!noOpenJML) {
   tasks.named<ShadowJar>("shadowJar") { dependsOn(tasks.named("initOpenJML")) }
 

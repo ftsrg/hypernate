@@ -176,14 +176,16 @@ public interface Entity<Type extends Entity<Type>> {
    * @see Entity#getFactory()
    */
   default EntityFactory<Type> getFactory() {
-    final Class<? extends Entity> ourClass = this.getClass();
+    // FIXME can we eliminate this unchecked cast in a reasonable way?
+    @SuppressWarnings("unchecked")
+    final Class<Type> ourClass = (Class<Type>) this.getClass();
     // Lambda-based implementation replaced with code below to accommodate OpenJML...
     return new EntityFactory<>() {
       @Override
       public Type create() {
         logger.debug("Was asked to create a new entity instance of {}...", ourClass.getName());
         try {
-          return (Type) ourClass.getDeclaredConstructor().newInstance();
+          return ourClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException
             | IllegalAccessException
             | InvocationTargetException
