@@ -9,14 +9,14 @@ import java.util.Deque;
 import java.util.List;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 
-/** Context specialized for the TPC-C chaincode implementation. */
-public class TPCCContext extends ContextWithRegistry {
+/** Context extended with all available stub middlewares and a registry. */
+public class ContextWithMiddlewares extends ContextWithRegistry {
 
   private final Deque<ChaincodeStub> stubMiddlewares = new ArrayDeque<>();
 
   private final List<Runnable> finishHooks = new ArrayList<>();
 
-  public TPCCContext(final ChaincodeStub fabricStub) {
+  public ContextWithMiddlewares(final ChaincodeStub fabricStub) {
     super(fabricStub);
 
     /*
