@@ -4,6 +4,7 @@ package hu.bme.mit.ftsrg.hypernate.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
 import java.io.IOException;
 import lombok.experimental.UtilityClass;
@@ -12,11 +13,8 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public final class JSON {
 
-  private static final ObjectMapper mapper = new ObjectMapper();
-
-  static {
-    mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
-  }
+  private static final ObjectMapper mapper =
+      JsonMapper.builder().enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
 
   /**
    * Serialize an object to a JSON string.
