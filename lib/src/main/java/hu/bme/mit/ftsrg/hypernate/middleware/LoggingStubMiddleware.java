@@ -1,4 +1,4 @@
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.middleware;
 
 import java.util.Arrays;
 import org.hyperledger.fabric.shim.ChaincodeStub;

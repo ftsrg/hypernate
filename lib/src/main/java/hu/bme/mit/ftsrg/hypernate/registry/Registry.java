@@ -1,5 +1,8 @@
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.registry;
 
+import hu.bme.mit.ftsrg.hypernate.entity.EntityExistsException;
+import hu.bme.mit.ftsrg.hypernate.entity.EntityNotFoundException;
+import hu.bme.mit.ftsrg.hypernate.entity.SerializableEntity;
 import java.util.Comparator;
 import java.util.List;
 import org.hyperledger.fabric.contract.Context;

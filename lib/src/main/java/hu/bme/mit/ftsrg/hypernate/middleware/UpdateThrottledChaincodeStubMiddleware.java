@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.middleware;
 
 import org.hyperledger.fabric.shim.ChaincodeStub;
 
