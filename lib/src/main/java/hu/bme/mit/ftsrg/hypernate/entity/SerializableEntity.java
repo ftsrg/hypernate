@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.entity;
 
 /**
  * A generic database entity that can be serialized to JSON and to byte arrays.

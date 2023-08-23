@@ -1,4 +1,4 @@
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.entity;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.entity;
 
 /**
  * Minimal interface to allow entities to return factories that produce them.

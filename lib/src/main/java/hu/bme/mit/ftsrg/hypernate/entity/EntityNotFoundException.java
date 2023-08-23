@@ -1,4 +1,4 @@
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.entity;
 
 public class EntityNotFoundException extends DataAccessException {
 

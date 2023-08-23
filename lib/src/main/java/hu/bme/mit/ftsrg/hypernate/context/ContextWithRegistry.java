@@ -1,5 +1,7 @@
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.context;
 
+import hu.bme.mit.ftsrg.hypernate.registry.Registry;
+import hu.bme.mit.ftsrg.hypernate.registry.RegistryImpl;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 

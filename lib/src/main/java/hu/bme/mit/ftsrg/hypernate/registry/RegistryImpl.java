@@ -1,6 +1,11 @@
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.registry;
 
 import com.jcabi.aspects.Loggable;
+import hu.bme.mit.ftsrg.hypernate.entity.EntityExistsException;
+import hu.bme.mit.ftsrg.hypernate.entity.EntityFactory;
+import hu.bme.mit.ftsrg.hypernate.entity.EntityNotFoundException;
+import hu.bme.mit.ftsrg.hypernate.entity.SerializableEntity;
+import hu.bme.mit.ftsrg.hypernate.util.MethodLogger;
 import java.util.*;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.shim.ledger.CompositeKey;

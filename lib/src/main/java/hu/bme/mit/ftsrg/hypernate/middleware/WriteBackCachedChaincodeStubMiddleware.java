@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.middleware;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
 
   private final Map<String, CachedItem> cache = new HashMap<>();
 
-  WriteBackCachedChaincodeStubMiddleware(final ChaincodeStub next) {
+  public WriteBackCachedChaincodeStubMiddleware(final ChaincodeStub next) {
     super(next);
   }
 

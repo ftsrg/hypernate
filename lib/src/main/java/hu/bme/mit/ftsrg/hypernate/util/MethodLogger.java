@@ -1,5 +1,6 @@
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.util;
 
+import hu.bme.mit.ftsrg.hypernate.entity.SerializableEntity;
 import java.util.ArrayList;
 import java.util.List;
 import org.hyperledger.fabric.contract.Context;
