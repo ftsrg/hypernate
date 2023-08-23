@@ -1,8 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.context;
 
-import hu.bme.mit.ftsrg.hypernate.registry.Registry;
-import hu.bme.mit.ftsrg.hypernate.registry.RegistryImpl;
+import hu.bme.mit.ftsrg.hypernate.Registry;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 
@@ -13,10 +12,11 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
  */
 public class ContextWithRegistry extends Context {
 
-  private final Registry registry = new RegistryImpl();
+  private final Registry registry;
 
   public ContextWithRegistry(final ChaincodeStub stub) {
     super(stub);
+    registry = new Registry(stub);
   }
 
   public Registry getRegistry() {
