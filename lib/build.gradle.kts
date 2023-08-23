@@ -6,6 +6,7 @@ import com.diffplug.gradle.spotless.SpotlessExtension
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import hu.bme.mit.ftsrg.gradle.openjml.*
 import java.io.File
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 val openJMLDir: Directory = layout.projectDirectory.dir(".openjml")
 val openJMLJavaHomeDir: Directory = openJMLDir.dir("jdk")
@@ -21,6 +22,7 @@ plugins {
   `java-library`
   id("com.github.johnrengelman.shadow") version "8.1.1"
   id("com.diffplug.spotless") version "6.20.0"
+  id("com.adarshr.test-logger") version "3.2.0"
 }
 
 group = "hu.bme.mit.ftsrg"
@@ -77,7 +79,13 @@ if (!noOpenJML) {
   }
 }
 
-tasks.test { useJUnitPlatform() }
+tasks.test {
+  useJUnitPlatform()
+  testLogging {
+    showExceptions = true
+    events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
+  }
+}
 
 configure<SpotlessExtension> {
   java {
