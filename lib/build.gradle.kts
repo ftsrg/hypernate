@@ -16,7 +16,7 @@ val jmlavac: RegularFile = openJMLJavaHomeDir.file("bin/jmlavac")
 val jmlava: RegularFile = openJMLJavaHomeDir.file("bin/jmlava")
 
 val withoutOpenJML: String? by project
-val noOpenJML: Boolean = withoutOpenJML != null && withoutOpenJML.toBoolean() == true
+val noOpenJML: Boolean = withoutOpenJML != null && withoutOpenJML.toBoolean()
 
 plugins {
   `java-library`
