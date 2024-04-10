@@ -4,7 +4,6 @@ package hu.bme.mit.ftsrg.hypernate.util;
 import static org.assertj.core.api.Assertions.*;
 
 import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
-import lombok.Data;
 import org.junit.jupiter.api.Test;
 
 public class JSONTest {
@@ -38,37 +37,7 @@ public class JSONTest {
 """);
   }
 
-  @Data
-  private static final class Foo {
+  private record Foo(String string) {}
 
-    private final String string;
-
-    public Foo(final String string) {
-      this.string = string;
-    }
-
-    public String getString() {
-      return string;
-    }
-  }
-
-  @Data
-  private static final class Bar {
-
-    private final String string;
-    private final int number;
-
-    public Bar(final String string, final int number) {
-      this.string = string;
-      this.number = number;
-    }
-
-    public String getString() {
-      return string;
-    }
-
-    public int getNumber() {
-      return number;
-    }
-  }
+  private record Bar(String string, int number) {}
 }

@@ -204,7 +204,7 @@ public class Registry {
         return null;
       }
 
-      final Type first = selection.get(0);
+      final Type first = selection.getFirst();
       logger.debug("Returning the first entity in selection", first);
       return first;
     }

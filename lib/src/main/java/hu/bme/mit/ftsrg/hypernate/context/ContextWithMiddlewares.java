@@ -29,13 +29,7 @@ public class ContextWithMiddlewares extends ContextWithRegistry {
     this.stubMiddlewares.push(cachedMiddleware);
     this.stubMiddlewares.push(new LoggingStubMiddleware(this.stubMiddlewares.peek()));
 
-    this.finishHooks.add(
-        new Runnable() {
-          @Override
-          public void run() {
-            cachedMiddleware.dispose();
-          }
-        });
+    this.finishHooks.add(cachedMiddleware::dispose);
   }
 
   @Override
