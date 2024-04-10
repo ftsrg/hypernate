@@ -4,6 +4,7 @@ package hu.bme.mit.ftsrg.hypernate.middleware;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +96,7 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
     }
   }
 
+  @Getter
   private static final class CachedItem {
 
     private final String key;
@@ -107,27 +109,11 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
       this.value = value;
     }
 
-    public String getKey() {
-      return this.key;
-    }
-
-    public byte[] getValue() {
-      return this.value;
-    }
-
     public void setValue(final byte[] value) {
       if (Arrays.equals(this.value, value)) return;
 
       this.value = value;
       this.dirty = true;
-    }
-
-    public boolean isDirty() {
-      return this.dirty;
-    }
-
-    public boolean isToDelete() {
-      return this.toDelete;
     }
 
     public void delete() {

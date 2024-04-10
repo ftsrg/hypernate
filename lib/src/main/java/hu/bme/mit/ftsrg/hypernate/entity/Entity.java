@@ -6,7 +6,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import lombok.EqualsAndHashCode;
 import org.hyperledger.fabric.contract.annotation.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +18,12 @@ import org.slf4j.LoggerFactory;
  *
  * @param <Type> the type of the entity (required because of {@link Entity#getFactory()})
  */
-@EqualsAndHashCode
 @DataType
 public interface Entity<Type extends Entity<Type>> {
 
-  static final Logger logger = LoggerFactory.getLogger(Entity.class);
+  Logger logger = LoggerFactory.getLogger(Entity.class);
 
-  static final int padLength = Integer.toString(Integer.MAX_VALUE).length();
+  int padLength = Integer.toString(Integer.MAX_VALUE).length();
 
   /**
    * Get the type of this entity; essentially a table name.
@@ -180,19 +178,16 @@ public interface Entity<Type extends Entity<Type>> {
     @SuppressWarnings("unchecked")
     final Class<Type> ourClass = (Class<Type>) this.getClass();
     // Lambda-based implementation replaced with code below to accommodate OpenJML...
-    return new EntityFactory<>() {
-      @Override
-      public Type create() {
-        logger.debug("Was asked to create a new entity instance of {}...", ourClass.getName());
-        try {
-          return ourClass.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException
-            | IllegalAccessException
-            | InvocationTargetException
-            | NoSuchMethodException e) {
-          logger.error("Failed to create new entity instance using factory", e);
-          throw new RuntimeException(e);
-        }
+    return () -> {
+      logger.debug("Was asked to create a new entity instance of {}...", ourClass.getName());
+      try {
+        return ourClass.getDeclaredConstructor().newInstance();
+      } catch (InstantiationException
+          | IllegalAccessException
+          | InvocationTargetException
+          | NoSuchMethodException e) {
+        logger.error("Failed to create new entity instance using factory", e);
+        throw new RuntimeException(e);
       }
     };
   }
