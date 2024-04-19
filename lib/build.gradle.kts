@@ -5,7 +5,6 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import hu.bme.mit.ftsrg.gradle.openjml.*
-import java.io.File
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 val openJMLDir: Directory = layout.projectDirectory.dir(".openjml")
@@ -23,6 +22,7 @@ plugins {
   id("com.github.johnrengelman.shadow") version "8.1.1"
   id("com.diffplug.spotless") version "6.20.0"
   id("com.adarshr.test-logger") version "3.2.0"
+  id("io.freefair.lombok") version "8.6"
 }
 
 group = "hu.bme.mit.ftsrg"
@@ -42,7 +42,6 @@ dependencies {
   implementation("org.aspectj:aspectjweaver:1.9.20")
   implementation("org.hyperledger.fabric-chaincode-java:fabric-chaincode-shim:2.5.0")
   implementation("org.hyperledger.fabric:fabric-protos:0.3.0")
-  implementation("org.projectlombok:lombok:1.18.28")
 
   testImplementation("org.assertj:assertj-core:3.24.2")
   testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
