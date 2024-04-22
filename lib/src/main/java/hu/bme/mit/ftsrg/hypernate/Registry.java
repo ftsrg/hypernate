@@ -18,11 +18,9 @@ import org.slf4j.LoggerFactory;
 @Loggable(Loggable.DEBUG) // FIXME how to configure AspectJ with OpenJML and Gradle?
 public class Registry {
 
-  private final ChaincodeStub stub;
-
   private static final Logger logger = LoggerFactory.getLogger(Registry.class);
-
   private static final MethodLogger methodLogger = new MethodLogger(logger, "Registry");
+  private final ChaincodeStub stub;
 
   public Registry(final ChaincodeStub stub) {
     this.stub = stub;
@@ -158,6 +156,11 @@ public class Registry {
     return compositeKey.toString();
   }
 
+  public interface Matcher<Type extends Entity<Type>> {
+
+    boolean match(Type entity);
+  }
+
   public static final class SelectionBuilder<Type extends Entity<Type>> {
 
     private List<Type> selection;
@@ -208,15 +211,5 @@ public class Registry {
       logger.debug("Returning the first entity in selection", first);
       return first;
     }
-  }
-
-  public interface Matcher<Type extends Entity<Type>> {
-
-    boolean match(Type entity);
-  }
-
-  public enum Order {
-    ASCENDING,
-    DESCENDING
   }
 }
