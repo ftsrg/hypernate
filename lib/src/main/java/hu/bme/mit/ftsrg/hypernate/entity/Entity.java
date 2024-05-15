@@ -158,11 +158,9 @@ public interface Entity<Type extends Entity<Type>> {
           ourField.set(this, theirField.get(obj));
         } catch (IllegalArgumentException | IllegalAccessException e) {
           logger.error("Got exception while trying to access/set a field", e);
-          e.printStackTrace();
         }
       } catch (NoSuchFieldException e) {
         logger.error("Got exception while trying to access/set a field", e);
-        e.printStackTrace();
       }
     }
   }
