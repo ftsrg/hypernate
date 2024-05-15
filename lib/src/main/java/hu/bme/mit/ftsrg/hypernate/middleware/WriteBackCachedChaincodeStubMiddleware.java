@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import org.hyperledger.fabric.shim.ChaincodeStub;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Stub middleware that caches reads in a local state.
@@ -16,13 +14,17 @@ import org.slf4j.LoggerFactory;
  */
 public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubMiddlewareBase {
 
-  private static final Logger logger =
-      LoggerFactory.getLogger(WriteBackCachedChaincodeStubMiddleware.class);
+  private final Logger logger;
 
   private final Map<String, CachedItem> cache = new HashMap<>();
 
   public WriteBackCachedChaincodeStubMiddleware(final ChaincodeStub next) {
+    this(next, new Logger() {});
+  }
+
+  public WriteBackCachedChaincodeStubMiddleware(final ChaincodeStub next, final Logger logger) {
     super(next);
+    this.logger = logger;
   }
 
   @Override
@@ -31,7 +33,7 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
 
     // New read, add to cache
     if (cached == null) {
-      logger.debug("Cache miss for key={} while reading; getting from next layer & caching", key);
+      logger.log("Cache miss for key={} while reading; getting from next layer & caching", key);
       final byte[] value = this.nextLayer.getState(key);
       cached = new CachedItem(key, value);
       cache.put(key, cached);
@@ -39,11 +41,11 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
 
     // Already marked for deletion
     if (cached.isToDelete()) {
-      logger.debug("Value at key={} marked for deletion; returning null", key);
+      logger.log("Value at key={} marked for deletion; returning null", key);
       return null;
     }
 
-    logger.debug("Returning value of cached item at key={}", key);
+    logger.log("Returning value of cached item at key={}", key);
     return cached.getValue();
   }
 
@@ -53,18 +55,18 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
 
     // Blind write!
     if (cached == null) {
-      logger.debug(
+      logger.log(
           "Cache miss for key={} while writing; creating new cache entry with null value", key);
       cached = new CachedItem(key, null); // Initial value set later
       cache.put(key, cached);
     }
 
     if (cached.isToDelete()) {
-      logger.error("Entry at key={} already deleted; cannot update", key);
+      logger.log("Entry at key={} already deleted; cannot update", key);
       throw new RuntimeException("Ledger entry " + key + " is already marked for deletion");
     }
 
-    logger.debug(
+    logger.log(
         "Setting value for cache item with key={} to a {}-long byte array", key, value.length);
     cached.setValue(value); // Sets the dirty flag if needed
   }
@@ -75,13 +77,13 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
 
     // Blind delete!
     if (cached == null) {
-      logger.debug(
+      logger.log(
           "Cache miss for key={} while deleting; creating new cache entry with null value", key);
       cached = new CachedItem(key, null);
       cache.put(key, cached);
     }
 
-    logger.debug("Deleting value from cache with key={}", key);
+    logger.log("Deleting value from cache with key={}", key);
     cached.delete();
   }
 
