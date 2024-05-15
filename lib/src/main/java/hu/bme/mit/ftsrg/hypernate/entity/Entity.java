@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import hu.bme.mit.ftsrg.hypernate.util.JSON;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +34,7 @@ public interface Entity<Type extends Entity<Type>> {
    * @return the arbitrary identifier of this entity type
    * @see Entity#getType()
    */
+  @JsonIgnore
   default String getType() {
     final String type = this.getClass().getName().toUpperCase();
     logger.debug("Returning type name: {}", type);
@@ -54,6 +56,7 @@ public interface Entity<Type extends Entity<Type>> {
    * @return the composite key of this entity
    * @see Entity#getKeyParts()
    */
+  @JsonIgnore
   default String[] getKeyParts() {
     // Stream-based implementation replaced with code below to accommodate OpenJML...
     final List<String> keyParts = new ArrayList<>();
@@ -173,6 +176,7 @@ public interface Entity<Type extends Entity<Type>> {
    * @return A factory that can be used to create empty instances of this entity
    * @see Entity#getFactory()
    */
+  @JsonIgnore
   default EntityFactory<Type> getFactory() {
     // FIXME can we eliminate this unchecked cast in a reasonable way?
     @SuppressWarnings("unchecked")
