@@ -4,7 +4,6 @@ package hu.bme.mit.ftsrg.hypernate;
 import com.jcabi.aspects.Loggable;
 import hu.bme.mit.ftsrg.hypernate.entity.Entity;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityExistsException;
-import hu.bme.mit.ftsrg.hypernate.entity.EntityFactory;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityNotFoundException;
 import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
 import java.util.*;
@@ -24,7 +23,7 @@ public class Registry {
     this.stub = stub;
   }
 
-  public <Type extends Entity<Type>> void create(final Type entity)
+  public <Type extends Entity> void create(final Type entity)
       throws EntityExistsException, SerializationException {
     assertNotExists(entity);
 
@@ -34,7 +33,7 @@ public class Registry {
     stub.putState(key, buffer);
   }
 
-  public <Type extends Entity<Type>> void update(final Type entity)
+  public <Type extends Entity> void update(final Type entity)
       throws EntityNotFoundException, SerializationException {
     assertExists(entity);
 
@@ -44,7 +43,7 @@ public class Registry {
     stub.putState(key, buffer);
   }
 
-  public <Type extends Entity<Type>> void delete(final Type entity) throws EntityNotFoundException {
+  public <Type extends Entity> void delete(final Type entity) throws EntityNotFoundException {
     assertExists(entity);
 
     final String key = getKey(entity);
@@ -52,7 +51,7 @@ public class Registry {
     stub.delState(key);
   }
 
-  public <Type extends Entity<Type>> Type read(final Type target)
+  public <Type extends Entity> Type read(final Type target)
       throws EntityNotFoundException, SerializationException {
     final String key = getKey(target);
     stubCallLogger.debug("Calling stub#getState with key={}", key);
@@ -69,7 +68,7 @@ public class Registry {
     return target;
   }
 
-  public <Type extends Entity<Type>> List<Type> readAll(final Type template)
+  public <Type extends Entity> List<Type> readAll(final Type template)
       throws SerializationException {
     final List<Type> entities = new ArrayList<>();
     final String compositeKey = stub.createCompositeKey(template.getType()).toString();
@@ -77,8 +76,7 @@ public class Registry {
     for (KeyValue keyValue : stub.getStateByPartialCompositeKey(compositeKey)) {
       final byte[] value = keyValue.getValue();
       classLogger.debug("Found value at partial key={}: {}", compositeKey, Arrays.toString(value));
-      final EntityFactory<Type> factory = template.getFactory();
-      final Type entity = factory.create();
+      final Type entity = (Type) template.create();
       entity.fromBuffer(value);
       classLogger.debug("Deserialized entity from data: {}", entity);
       entities.add(entity);
@@ -88,7 +86,7 @@ public class Registry {
     return entities;
   }
 
-  public <Type extends Entity<Type>> SelectionBuilder<Type> select(final Type template)
+  public <Type extends Entity> SelectionBuilder<Type> select(final Type template)
       throws SerializationException {
     return new SelectionBuilder<>(readAll(template));
   }
@@ -100,12 +98,12 @@ public class Registry {
   }
 
   @Loggable(Loggable.DEBUG)
-  private <Type extends Entity<Type>> boolean exists(final Type obj) {
+  private <Type extends Entity> boolean exists(final Type obj) {
     return keyExists(getKey(obj));
   }
 
   @Loggable(Loggable.DEBUG)
-  private <Type extends Entity<Type>> void assertNotExists(final Type obj)
+  private <Type extends Entity> void assertNotExists(final Type obj)
       throws EntityExistsException {
     if (exists(obj)) {
       throw new EntityExistsException(getKey(obj));
@@ -113,7 +111,7 @@ public class Registry {
   }
 
   @Loggable(Loggable.DEBUG)
-  private <Type extends Entity<Type>> void assertExists(final Type obj)
+  private <Type extends Entity> void assertExists(final Type obj)
       throws EntityNotFoundException {
     if (!exists(obj)) {
       throw new EntityNotFoundException(getKey(obj));
@@ -121,17 +119,17 @@ public class Registry {
   }
 
   @Loggable(Loggable.DEBUG)
-  private <Type extends Entity<Type>> String getKey(final Type obj) {
+  private <Type extends Entity> String getKey(final Type obj) {
     return stub.createCompositeKey(obj.getType(), obj.getKeyParts()).toString();
   }
 
-  public interface Matcher<Type extends Entity<Type>> {
+  public interface Matcher<Type extends Entity> {
 
     boolean match(Type entity);
   }
 
   @Loggable(Loggable.DEBUG)
-  public static final class SelectionBuilder<Type extends Entity<Type>> {
+  public static final class SelectionBuilder<Type extends Entity> {
 
     private final Logger logger = LoggerFactory.getLogger(SelectionBuilder.class);
 

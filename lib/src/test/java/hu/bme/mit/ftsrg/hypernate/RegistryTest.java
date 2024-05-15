@@ -53,7 +53,7 @@ class RegistryTest {
     given(entity.getType()).willReturn(ENTITY_TYPE);
   }
 
-  private static class TestEntity implements Entity<TestEntity> {}
+  private static class TestEntity implements Entity {}
 
   @Nested
   class given_empty_ledger {
@@ -184,7 +184,7 @@ class RegistryTest {
     @Test
     void when_readAll_then_return_one_long_list() throws SerializationException {
       given(entity.getType()).willReturn(ENTITY_TYPE);
-      given(entity.getFactory()).willReturn(() -> entity);
+      given(entity.create()).willReturn(entity);
       given(stub.createCompositeKey(ENTITY_TYPE)).willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getStateByPartialCompositeKey(anyString()))
           .willReturn(
