@@ -2,6 +2,7 @@
 package hu.bme.mit.ftsrg.hypernate.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jcabi.aspects.Loggable;
 import hu.bme.mit.ftsrg.hypernate.util.JSON;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
  * @param <Type> the type of the entity (required because of {@link Entity#getFactory()})
  */
 @DataType
+@Loggable(Loggable.DEBUG)
 public interface Entity<Type extends Entity<Type>> {
 
   Logger logger = LoggerFactory.getLogger(Entity.class);
@@ -36,9 +38,7 @@ public interface Entity<Type extends Entity<Type>> {
    */
   @JsonIgnore
   default String getType() {
-    final String type = this.getClass().getName().toUpperCase();
-    logger.debug("Returning type name: {}", type);
-    return type;
+    return this.getClass().getName().toUpperCase();
   }
 
   /**
@@ -74,7 +74,6 @@ public interface Entity<Type extends Entity<Type>> {
       }
     }
 
-    logger.debug("Returning key parts for entity: {}", keyParts);
     return keyParts.toArray(new String[0]);
   }
 
@@ -89,10 +88,7 @@ public interface Entity<Type extends Entity<Type>> {
    * @see Entity#toBuffer()
    */
   default byte[] toBuffer() throws SerializationException {
-    final String json = this.toJson();
-    final byte[] buffer = json.getBytes(StandardCharsets.UTF_8);
-    logger.debug("Returning buffer (size={}) from JSON: {}", buffer.length, json);
-    return buffer;
+    return toJson().getBytes(StandardCharsets.UTF_8);
   }
 
   /**
@@ -120,9 +116,7 @@ public interface Entity<Type extends Entity<Type>> {
    * @see Entity#toJson()
    */
   default String toJson() throws SerializationException {
-    final String json = JSON.serialize(this);
-    logger.debug("Returning JSON string from entity: {}", json);
-    return json;
+    return JSON.serialize(this);
   }
 
   /**
@@ -138,7 +132,6 @@ public interface Entity<Type extends Entity<Type>> {
    * @see Entity#fromJson(String)
    */
   default void fromJson(String json) throws SerializationException {
-    logger.debug("Deserializing from JSON string: {}...", json);
     final Object obj = JSON.deserialize(json, this.getClass());
     final Field[] ourFields = this.getClass().getDeclaredFields();
     /*
