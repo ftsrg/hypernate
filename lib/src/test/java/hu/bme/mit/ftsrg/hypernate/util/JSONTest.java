@@ -17,9 +17,7 @@ public class JSONTest {
     String json = JSON.serialize(obj);
 
     /* --- then --- */
-    assertThat(json).isEqualToIgnoringWhitespace("""
-{"string": "abc"}
-""");
+    assertThat(json).isEqualToIgnoringWhitespace("{\"string\": \"abc\"}");
   }
 
   @Test
@@ -32,9 +30,7 @@ public class JSONTest {
     String json = JSON.serialize(obj);
 
     /* --- then --- */
-    assertThat(json).isEqualToIgnoringWhitespace("""
-{"number": 100, "string": "abc"}
-""");
+    assertThat(json).isEqualToIgnoringWhitespace("{\"number\": 100, \"string\": \"abc\"}");
   }
 
   private record Foo(String string) {}

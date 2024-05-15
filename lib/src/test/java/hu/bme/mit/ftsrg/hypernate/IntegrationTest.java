@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate;
 
 import static org.mockito.BDDMockito.given;
