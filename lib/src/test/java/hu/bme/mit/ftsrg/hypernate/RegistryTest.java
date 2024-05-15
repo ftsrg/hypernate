@@ -29,8 +29,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 @DisplayNameGeneration(ReplaceUnderscores.class)
+@ExtendWith(MockitoExtension.class)
 class RegistryTest {
 
   private static final String ENTITY_TYPE = "TEST_ENTITY";

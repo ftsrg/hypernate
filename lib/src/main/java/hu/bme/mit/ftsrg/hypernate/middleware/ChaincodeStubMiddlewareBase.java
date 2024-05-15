@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.middleware;
 
+import com.jcabi.aspects.Loggable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import org.hyperledger.fabric.shim.ledger.QueryResultsIteratorWithMetadata;
  * override any method in this class to inject your custom behaviour, such as logging, access
  * control, caching, etc.
  */
+@Loggable(Loggable.DEBUG)
 public abstract class ChaincodeStubMiddlewareBase implements ChaincodeStub {
 
   public ChaincodeStubMiddlewareBase(final ChaincodeStub nextLayer) {

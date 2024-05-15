@@ -5,11 +5,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.jcabi.aspects.Loggable;
 import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
 import java.io.IOException;
 import lombok.experimental.UtilityClass;
 
 /** A convenience facade for a concrete JSON-serializer. */
+@Loggable(Loggable.DEBUG)
 @UtilityClass
 public final class JSON {
 

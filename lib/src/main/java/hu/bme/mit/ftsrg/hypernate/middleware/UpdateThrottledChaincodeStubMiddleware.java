@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.middleware;
 
+import com.jcabi.aspects.Loggable;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 
 /**
@@ -9,6 +10,7 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
  *
  * @see ChaincodeStubMiddlewareBase
  */
+@Loggable(Loggable.DEBUG)
 public final class UpdateThrottledChaincodeStubMiddleware extends ChaincodeStubMiddlewareBase {
 
   public UpdateThrottledChaincodeStubMiddleware(ChaincodeStub nextLayer) {
