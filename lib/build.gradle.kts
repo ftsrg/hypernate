@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
@@ -30,6 +31,7 @@ dependencies {
     implementation("org.hyperledger.fabric-chaincode-java:fabric-chaincode-shim:2.5.0")
     implementation("org.hyperledger.fabric:fabric-protos:0.3.0")
 
+    testImplementation("org.slf4j:slf4j-simple:2.0.13")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("org.mockito:mockito-core:5.11.0")
@@ -44,6 +46,8 @@ tasks.test {
     useJUnitPlatform()
     testLogging {
         showExceptions = true
+        showStandardStreams = true
+        exceptionFormat = TestExceptionFormat.FULL
         events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
     }
 }
