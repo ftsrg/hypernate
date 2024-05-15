@@ -84,7 +84,7 @@ public class Registry {
     }
 
     target.fromBuffer(data);
-    logger.debug("Deserialized entity from data", target);
+    logger.debug("Deserialized entity from data: {}", target);
 
     methodLogger.logEnd("read", paramsString, target.toString());
     return target;
@@ -104,7 +104,7 @@ public class Registry {
       final EntityFactory<Type> factory = template.getFactory();
       final Type entity = factory.create();
       entity.fromBuffer(value);
-      logger.debug("Deserialized entity from data", entity);
+      logger.debug("Deserialized entity from data: {}", entity);
       entities.add(entity);
     }
     logger.debug("Found {} entities in total for partial key={}", entities.size(), compositeKey);
@@ -172,7 +172,7 @@ public class Registry {
     public SelectionBuilder<Type> matching(final Matcher<Type> matcher) {
       final List<Type> newSelection = new ArrayList<>();
       for (Type entity : selection) {
-        logger.debug("Testing matcher on entity", entity);
+        logger.debug("Testing matcher on entity: {}", entity);
         if (matcher.match(entity)) {
           logger.debug("Entity matches");
           newSelection.add(entity);
@@ -208,7 +208,7 @@ public class Registry {
       }
 
       final Type first = selection.get(0);
-      logger.debug("Returning the first entity in selection", first);
+      logger.debug("Returning the first entity in selection: {}", first);
       return first;
     }
   }

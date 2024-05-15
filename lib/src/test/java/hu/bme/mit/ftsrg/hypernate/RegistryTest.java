@@ -156,7 +156,7 @@ class RegistryTest {
     }
 
     @Test
-    void when_delete_then_call_delState() throws SerializationException, EntityNotFoundException {
+    void when_delete_then_call_delState() throws EntityNotFoundException {
       given(entity.getKeyParts()).willReturn(ENTITY_KEY_PARTS);
       given(stub.createCompositeKey(ENTITY_TYPE, ENTITY_KEY_PARTS))
           .willReturn(ENTITY_COMPOSITE_KEY);
