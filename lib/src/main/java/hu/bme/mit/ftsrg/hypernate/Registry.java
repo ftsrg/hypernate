@@ -16,7 +16,8 @@ import org.slf4j.LoggerFactory;
 public class Registry {
 
   private static final Logger classLogger = LoggerFactory.getLogger(Registry.class);
-  private static final Logger stubCallLogger = LoggerFactory.getLogger(Registry.class.getName() + ":StubCalls");
+  private static final Logger stubCallLogger =
+      LoggerFactory.getLogger(Registry.class.getName() + ":StubCalls");
   private final ChaincodeStub stub;
 
   public Registry(final ChaincodeStub stub) {
@@ -29,7 +30,8 @@ public class Registry {
 
     final String key = getKey(entity);
     final byte[] buffer = entity.toBuffer();
-    stubCallLogger.debug("Calling stub#putState with key={} and value={}", key, Arrays.toString(buffer));
+    stubCallLogger.debug(
+        "Calling stub#putState with key={} and value={}", key, Arrays.toString(buffer));
     stub.putState(key, buffer);
   }
 
@@ -39,7 +41,8 @@ public class Registry {
 
     final String key = getKey(entity);
     final byte[] buffer = entity.toBuffer();
-    stubCallLogger.debug("Calling stub#putState with key={} and value={}", key, Arrays.toString(buffer));
+    stubCallLogger.debug(
+        "Calling stub#putState with key={} and value={}", key, Arrays.toString(buffer));
     stub.putState(key, buffer);
   }
 
@@ -72,7 +75,8 @@ public class Registry {
       throws SerializationException {
     final List<Type> entities = new ArrayList<>();
     final String compositeKey = stub.createCompositeKey(template.getType()).toString();
-    stubCallLogger.debug("Calling stub#getStateByPartialCompositeKey with partial key={}", compositeKey);
+    stubCallLogger.debug(
+        "Calling stub#getStateByPartialCompositeKey with partial key={}", compositeKey);
     for (KeyValue keyValue : stub.getStateByPartialCompositeKey(compositeKey)) {
       final byte[] value = keyValue.getValue();
       classLogger.debug("Found value at partial key={}: {}", compositeKey, Arrays.toString(value));
@@ -81,7 +85,8 @@ public class Registry {
       classLogger.debug("Deserialized entity from data: {}", entity);
       entities.add(entity);
     }
-    classLogger.debug("Found {} entities in total for partial key={}", entities.size(), compositeKey);
+    classLogger.debug(
+        "Found {} entities in total for partial key={}", entities.size(), compositeKey);
 
     return entities;
   }
@@ -103,16 +108,14 @@ public class Registry {
   }
 
   @Loggable(Loggable.DEBUG)
-  private <Type extends Entity> void assertNotExists(final Type obj)
-      throws EntityExistsException {
+  private <Type extends Entity> void assertNotExists(final Type obj) throws EntityExistsException {
     if (exists(obj)) {
       throw new EntityExistsException(getKey(obj));
     }
   }
 
   @Loggable(Loggable.DEBUG)
-  private <Type extends Entity> void assertExists(final Type obj)
-      throws EntityNotFoundException {
+  private <Type extends Entity> void assertExists(final Type obj) throws EntityNotFoundException {
     if (!exists(obj)) {
       throw new EntityNotFoundException(getKey(obj));
     }

@@ -3,11 +3,11 @@ package hu.bme.mit.ftsrg.hypernate.middleware;
 
 import com.jcabi.aspects.Loggable;
 import java.util.Arrays;
-import org.slf4j.Logger;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
 import org.hyperledger.fabric.shim.ChaincodeStub;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -18,7 +18,8 @@ import org.slf4j.LoggerFactory;
 @Loggable(Loggable.DEBUG)
 public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubMiddlewareBase {
 
-  private final Logger logger = LoggerFactory.getLogger(WriteBackCachedChaincodeStubMiddleware.class);
+  private final Logger logger =
+      LoggerFactory.getLogger(WriteBackCachedChaincodeStubMiddleware.class);
 
   private final Map<String, CachedItem> cache = new HashMap<>();
 

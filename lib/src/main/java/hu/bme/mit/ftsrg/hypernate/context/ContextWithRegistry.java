@@ -15,7 +15,7 @@ public class ContextWithRegistry extends Context {
   public ContextWithRegistry(final ChaincodeStub stub) {
     super(stub);
   }
-  
+
   public Registry getRegistry() {
     return new Registry(getStub());
   }

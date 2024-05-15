@@ -161,7 +161,10 @@ public interface Entity {
     final Class<? extends Entity> clazz = getClass();
     try {
       return clazz.getDeclaredConstructor().newInstance();
-    } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+    } catch (NoSuchMethodException
+        | InstantiationException
+        | IllegalAccessException
+        | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
   }
