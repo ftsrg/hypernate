@@ -28,7 +28,7 @@ class IntegrationTest {
 
   @Data
   @EqualsAndHashCode(callSuper = true)
-  private static final class TestEntity extends BasicEntity<TestEntity> {
+  private static final class TestEntity extends BasicEntity {
     final int id;
   }
 

@@ -17,12 +17,10 @@ import org.slf4j.LoggerFactory;
  *
  * <p>The default method implementations provide some reflection-based implementations, so that you
  * do not have to implement all the boilerplate yourself in the actual entity classes.
- *
- * @param <Type> the type of the entity (required because of {@link Entity#getFactory()})
  */
 @DataType
 @Loggable(Loggable.DEBUG)
-public interface Entity<Type extends Entity<Type>> {
+public interface Entity {
 
   Logger logger = LoggerFactory.getLogger(Entity.class);
 
@@ -158,33 +156,14 @@ public interface Entity<Type extends Entity<Type>> {
     }
   }
 
-  /**
-   * Get a factory for this entity type.
-   *
-   * <p><b>WARNING:</b> the rather lousy default reflection-based implementation that has not been
-   * tested
-   *
-   * @return A factory that can be used to create empty instances of this entity
-   * @see Entity#getFactory()
-   */
   @JsonIgnore
-  default EntityFactory<Type> getFactory() {
-    // FIXME can we eliminate this unchecked cast in a reasonable way?
-    @SuppressWarnings("unchecked")
-    final Class<Type> ourClass = (Class<Type>) this.getClass();
-    // Lambda-based implementation replaced with code below to accommodate OpenJML...
-    return () -> {
-      logger.debug("Was asked to create a new entity instance of {}...", ourClass.getName());
-      try {
-        return ourClass.getDeclaredConstructor().newInstance();
-      } catch (InstantiationException
-          | IllegalAccessException
-          | InvocationTargetException
-          | NoSuchMethodException e) {
-        logger.error("Failed to create new entity instance using factory", e);
-        throw new RuntimeException(e);
-      }
-    };
+  default Entity create() {
+    final Class<? extends Entity> clazz = getClass();
+    try {
+      return clazz.getDeclaredConstructor().newInstance();
+    } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
