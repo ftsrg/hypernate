@@ -41,6 +41,7 @@ dependencies {
 
 tasks.withType<JavaCompile> {
   options.compilerArgs.addAll(listOf("-Xlint:unchecked", "-Xlint:deprecation"))
+  options.release = 8
 }
 
 tasks.test {

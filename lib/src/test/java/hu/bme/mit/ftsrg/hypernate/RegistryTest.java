@@ -102,13 +102,13 @@ class RegistryTest {
       given(stub.createCompositeKey(ENTITY_TYPE)).willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getStateByPartialCompositeKey(anyString()))
           .willReturn(
-              new QueryResultsIterator<>() {
+              new QueryResultsIterator<KeyValue>() {
                 @Override
                 public void close() {}
 
                 @Override
                 public @Nonnull Iterator<KeyValue> iterator() {
-                  return new Iterator<>() {
+                  return new Iterator<KeyValue>() {
                     @Override
                     public boolean hasNext() {
                       return false;
@@ -188,7 +188,7 @@ class RegistryTest {
       given(stub.createCompositeKey(ENTITY_TYPE)).willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getStateByPartialCompositeKey(anyString()))
           .willReturn(
-              new QueryResultsIterator<>() {
+              new QueryResultsIterator<KeyValue>() {
                 private boolean done = false;
 
                 @Override
@@ -196,7 +196,7 @@ class RegistryTest {
 
                 @Override
                 public @Nonnull Iterator<KeyValue> iterator() {
-                  return new Iterator<>() {
+                  return new Iterator<KeyValue>() {
                     @Override
                     public boolean hasNext() {
                       return !done;

@@ -175,7 +175,7 @@ public interface Entity {
    * @param num The number to pad.
    * @return The padded number text.
    */
-  private static String pad(final int num) {
+  static String pad(final int num) {
     return String.format("%0" + padLength + "d", num);
   }
 }

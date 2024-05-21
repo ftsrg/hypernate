@@ -4,6 +4,6 @@ package hu.bme.mit.ftsrg.hypernate.entity;
 public class EntityExistsException extends DataAccessException {
 
   public EntityExistsException(final String key) {
-    super("Entity with key '%s' already exists".formatted(key));
+    super(String.format("Entity with key '%s' already exists", key));
   }
 }

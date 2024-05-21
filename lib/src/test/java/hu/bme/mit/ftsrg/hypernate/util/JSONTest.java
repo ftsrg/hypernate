@@ -11,7 +11,7 @@ public class JSONTest {
   @Test
   public void givenObject_whenSerialize_thenReturnJSONString() throws SerializationException {
     /* --- given --- */
-    var obj = new Foo("abc");
+    Foo obj = new Foo("abc");
 
     /* --- when --- */
     String json = JSON.serialize(obj);
@@ -24,7 +24,7 @@ public class JSONTest {
   public void givenObject_whenSerialize_thenReturnJSONStringWithAlphabeticallyOrderedKeys()
       throws SerializationException {
     /* --- given --- */
-    var obj = new Bar("abc", 100);
+    Bar obj = new Bar("abc", 100);
 
     /* --- when --- */
     String json = JSON.serialize(obj);
@@ -33,7 +33,35 @@ public class JSONTest {
     assertThat(json).isEqualToIgnoringWhitespace("{\"number\": 100, \"string\": \"abc\"}");
   }
 
-  private record Foo(String string) {}
+  private static class Foo {
 
-  private record Bar(String string, int number) {}
+    private final String string;
+
+    Foo(final String string) {
+      this.string = string;
+    }
+
+    public String string() {
+      return string;
+    }
+  }
+
+  private static class Bar {
+
+    private final String string;
+    private final int number;
+
+    Bar(final String string, final int number) {
+      this.string = string;
+      this.number = number;
+    }
+
+    public String string() {
+      return string;
+    }
+
+    public int number() {
+      return number;
+    }
+  }
 }

@@ -42,7 +42,7 @@ class IntegrationTest {
   @Test
   void given_entity_when_create_then_success()
       throws SerializationException, EntityExistsException {
-    var key = new CompositeKey(entity.getType(), entity.getKeyParts());
+    CompositeKey key = new CompositeKey(entity.getType(), entity.getKeyParts());
 
     given(stub.createCompositeKey(entity.getType(), entity.getKeyParts())).willReturn(key);
 
