@@ -26,11 +26,24 @@ public class HypernateContext extends Context {
     return new Registry(getStub());
   }
 
-  public void installMiddleware(ChaincodeStubMiddleware middleware) {
+  /**
+   * Add a new middleware to the chain.
+   *
+   * <p>Note that the order of middlewares matters – middlewares maintain the order in which they
+   * are installed.
+   *
+   * @param middleware the middleware object to append to the chain
+   */
+  protected void installMiddleware(ChaincodeStubMiddleware middleware) {
     middlewares.add(middleware);
   }
 
-  public void uninstallMiddleware(ChaincodeStubMiddleware middleware) {
+  /**
+   * Remove a middleware from the chain.
+   *
+   * @param middleware the middleware object to remove
+   */
+  protected void uninstallMiddleware(ChaincodeStubMiddleware middleware) {
     middlewares.remove(middleware);
   }
 
