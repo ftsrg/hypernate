@@ -2,21 +2,12 @@
 package hu.bme.mit.ftsrg.hypernate.middleware;
 
 import com.jcabi.aspects.Loggable;
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-
-import hu.bme.mit.ftsrg.hypernate.middleware.event.ChaincodeEventHandler;
+import hu.bme.mit.ftsrg.hypernate.middleware.event.HypernateEvent;
+import hu.bme.mit.ftsrg.hypernate.middleware.event.HypernateEventHandler;
+import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionBegin;
+import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionEnd;
 import lombok.experimental.Delegate;
-import org.hyperledger.fabric.protos.peer.ChaincodeEvent;
-import org.hyperledger.fabric.protos.peer.SignedProposal;
-import org.hyperledger.fabric.shim.Chaincode.Response;
 import org.hyperledger.fabric.shim.ChaincodeStub;
-import org.hyperledger.fabric.shim.ledger.CompositeKey;
-import org.hyperledger.fabric.shim.ledger.KeyModification;
-import org.hyperledger.fabric.shim.ledger.KeyValue;
-import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
-import org.hyperledger.fabric.shim.ledger.QueryResultsIteratorWithMetadata;
 
 /**
  * {@link ChaincodeStub} middlewares to be chained.
@@ -27,12 +18,50 @@ import org.hyperledger.fabric.shim.ledger.QueryResultsIteratorWithMetadata;
  * access control, caching, etc.
  */
 @Loggable(Loggable.DEBUG)
-public abstract class ChaincodeStubMiddleware implements ChaincodeStub, ChaincodeEventHandler {
+public abstract class ChaincodeStubMiddleware implements ChaincodeStub, HypernateEventHandler {
+
+  /** The next {@link ChaincodeStub} in the chain. */
+  @Delegate(types = ChaincodeStub.class)
+  protected final ChaincodeStub nextLayer;
 
   public ChaincodeStubMiddleware(final ChaincodeStub nextLayer) {
     this.nextLayer = nextLayer;
   }
 
-  @Delegate(types = ChaincodeStub.class)
-  protected final ChaincodeStub nextLayer;
+  /**
+   * Hypernate event listener.
+   *
+   * <p>You can override this method to react to any {@link HypernateEvent}s received. For example:
+   *
+   * <pre>{@code
+   * @Override
+   * protected void onEvent(final HypernateEvent event) {
+   *   if (event instanceof MyCustomEvent) {
+   *     System.out.println("Handling custom event");
+   *   } else {
+   *     System.out.println("Received non-handled event – ignoring it");
+   *   }
+   * }
+   * }</pre>
+   *
+   * @param event
+   */
+  public void onEvent(final HypernateEvent event) {}
+
+  /** Convenience method to for handling the {@link TransactionBegin} event. */
+  protected void onTransactionBegin() {}
+
+  /** Convenience method to for handling the {@link TransactionEnd} event. */
+  protected void onTransactionEnd() {}
+
+  @Override
+  public void handleEventInternal(HypernateEvent event) {
+    if (event instanceof TransactionBegin) {
+      onTransactionBegin();
+    } else if (event instanceof TransactionEnd) {
+      onTransactionEnd();
+    }
+
+    onEvent(event);
+  }
 }
