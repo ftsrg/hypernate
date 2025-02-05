@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import hu.bme.mit.ftsrg.hypernate.middleware.event.ChaincodeEventHandler;
 import lombok.experimental.Delegate;
 import org.hyperledger.fabric.protos.peer.ChaincodeEvent;
 import org.hyperledger.fabric.protos.peer.SignedProposal;
@@ -26,7 +27,7 @@ import org.hyperledger.fabric.shim.ledger.QueryResultsIteratorWithMetadata;
  * access control, caching, etc.
  */
 @Loggable(Loggable.DEBUG)
-public abstract class ChaincodeStubMiddleware implements ChaincodeStub {
+public abstract class ChaincodeStubMiddleware implements ChaincodeStub, ChaincodeEventHandler {
 
   public ChaincodeStubMiddleware(final ChaincodeStub nextLayer) {
     this.nextLayer = nextLayer;
