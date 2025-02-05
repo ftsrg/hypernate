@@ -2,14 +2,14 @@
 package hu.bme.mit.ftsrg.hypernate.context;
 
 import hu.bme.mit.ftsrg.hypernate.Registry;
-import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddlewareBase;
+import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddleware;
 import java.util.LinkedList;
 import java.util.List;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 
 /**
- * Context enriched with {@link Registry} and {@link ChaincodeStubMiddlewareBase}s
+ * Context enriched with {@link Registry} and {@link ChaincodeStubMiddleware}s
  *
  * <p>The registry can be used to manage entities.
  */
