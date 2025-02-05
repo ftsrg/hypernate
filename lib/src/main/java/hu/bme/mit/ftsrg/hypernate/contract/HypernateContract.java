@@ -15,10 +15,10 @@ public interface HypernateContract extends ContractInterface {
   }
 
   default void beforeTransaction(HypernateContext ctx) {
-    ctx.raiseEvent(new TransactionBegin());
+    ctx.fireEvent(new TransactionBegin());
   }
 
   default void afterTransaction(HypernateContext ctx) {
-    ctx.raiseEvent(new TransactionEnd());
+    ctx.fireEvent(new TransactionEnd());
   }
 }

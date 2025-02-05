@@ -47,7 +47,14 @@ public class HypernateContext extends Context {
     middlewares.remove(middleware);
   }
 
-  public void raiseEvent(final HypernateEvent event) {
+  /**
+   * Fire a {@link HypernateEvent}.
+   *
+   * <p>Notifies all middlewares in the chain (in the order in which they have been added).
+   *
+   * @param event the event to fire
+   */
+  public void fireEvent(final HypernateEvent event) {
     middlewares.forEach(mw -> mw.onEvent(event));
   }
 }
