@@ -1,7 +1,7 @@
 package hu.bme.mit.ftsrg.hypernate.middleware.event;
 
 import lombok.Data;
-import lombok.Value;
 
+/** Base class for internal Hypernate events. */
 @Data
-public class HypernateEvent {}
+public abstract class HypernateEvent {}
