@@ -13,10 +13,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Stub middleware that caches reads in a local state.
  *
- * @see ChaincodeStubMiddlewareBase
+ * @see ChaincodeStubMiddleware
  */
 @Loggable(Loggable.DEBUG)
-public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubMiddlewareBase {
+public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubMiddleware {
 
   private final Logger logger =
       LoggerFactory.getLogger(WriteBackCachedChaincodeStubMiddleware.class);

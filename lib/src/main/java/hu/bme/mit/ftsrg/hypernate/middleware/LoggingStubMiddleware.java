@@ -8,9 +8,9 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
  * Stub middleware that simply logs all {@link ChaincodeStub#getState(String)}, {@link
  * ChaincodeStub#putState(String, byte[])}, and {@link ChaincodeStub#delState(String)} calls.
  *
- * @see ChaincodeStubMiddlewareBase
+ * @see ChaincodeStubMiddleware
  */
-public class LoggingStubMiddleware extends ChaincodeStubMiddlewareBase {
+public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
 
   private final Logger logger;
 
