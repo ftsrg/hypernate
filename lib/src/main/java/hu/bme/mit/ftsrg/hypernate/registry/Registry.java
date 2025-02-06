@@ -24,7 +24,7 @@ public class Registry {
     this.stub = stub;
   }
 
-  public <Type extends Entity> void create(final Type entity)
+  public <T extends Entity> void create(final T entity)
       throws EntityExistsException, SerializationException {
     assertNotExists(entity);
 
@@ -35,7 +35,7 @@ public class Registry {
     stub.putState(key, buffer);
   }
 
-  public <Type extends Entity> void update(final Type entity)
+  public <T extends Entity> void update(final T entity)
       throws EntityNotFoundException, SerializationException {
     assertExists(entity);
 
@@ -46,7 +46,7 @@ public class Registry {
     stub.putState(key, buffer);
   }
 
-  public <Type extends Entity> void delete(final Type entity) throws EntityNotFoundException {
+  public <T extends Entity> void delete(final T entity) throws EntityNotFoundException {
     assertExists(entity);
 
     final String key = key(entity);
@@ -54,7 +54,7 @@ public class Registry {
     stub.delState(key);
   }
 
-  public <Type extends Entity> Type read(final Type target)
+  public <T extends Entity> T read(final T target)
       throws EntityNotFoundException, SerializationException {
     final String key = key(target);
     stubCallLogger.debug("Calling stub#getState with key={}", key);
@@ -71,16 +71,15 @@ public class Registry {
     return target;
   }
 
-  public <Type extends Entity> List<Type> readAll(final Type template)
-      throws SerializationException {
-    final List<Type> entities = new ArrayList<>();
+  public <T extends Entity> List<T> readAll(final T template) throws SerializationException {
+    final List<T> entities = new ArrayList<>();
     final String compositeKey = stub.createCompositeKey(template.getType()).toString();
     stubCallLogger.debug(
         "Calling stub#getStateByPartialCompositeKey with partial key={}", compositeKey);
     for (KeyValue keyValue : stub.getStateByPartialCompositeKey(compositeKey)) {
       final byte[] value = keyValue.getValue();
       classLogger.debug("Found value at partial key={}: {}", compositeKey, Arrays.toString(value));
-      final Type entity = (Type) template.create();
+      final T entity = (T) template.create();
       entity.fromBuffer(value);
       classLogger.debug("Deserialized entity from data: {}", entity);
       entities.add(entity);
@@ -91,7 +90,7 @@ public class Registry {
     return entities;
   }
 
-  public <Type extends Entity> SelectionBuilder<Type> select(final Type template)
+  public <T extends Entity> SelectionBuilder<T> select(final T template)
       throws SerializationException {
     return new SelectionBuilder<>(readAll(template));
   }
@@ -103,48 +102,48 @@ public class Registry {
   }
 
   @Loggable(Loggable.DEBUG)
-  private <Type extends Entity> boolean exists(final Type obj) {
-    return keyExists(getKey(obj));
+  private <T extends Entity> boolean exists(final T obj) {
+    return keyExists(key(obj));
   }
 
   @Loggable(Loggable.DEBUG)
-  private <Type extends Entity> void assertNotExists(final Type obj) throws EntityExistsException {
+  private <T extends Entity> void assertNotExists(final T obj) throws EntityExistsException {
     if (exists(obj)) {
-      throw new EntityExistsException(getKey(obj));
+      throw new EntityExistsException(key(obj));
     }
   }
 
   @Loggable(Loggable.DEBUG)
-  private <Type extends Entity> void assertExists(final Type obj) throws EntityNotFoundException {
+  private <T extends Entity> void assertExists(final T obj) throws EntityNotFoundException {
     if (!exists(obj)) {
-      throw new EntityNotFoundException(getKey(obj));
+      throw new EntityNotFoundException(key(obj));
     }
   }
 
   @Loggable(Loggable.DEBUG)
-  private <Type extends Entity> String getKey(final Type obj) {
+  private <T extends Entity> String key(final T obj) {
     return stub.createCompositeKey(obj.getType(), obj.getKeyParts()).toString();
   }
 
-  public interface Matcher<Type extends Entity> {
+  public interface Matcher<T extends Entity> {
 
-    boolean match(Type entity);
+    boolean match(T entity);
   }
 
   @Loggable(Loggable.DEBUG)
-  public static final class SelectionBuilder<Type extends Entity> {
+  public static final class SelectionBuilder<T extends Entity> {
 
     private final Logger logger = LoggerFactory.getLogger(SelectionBuilder.class);
 
-    private List<Type> selection;
+    private List<T> selection;
 
-    SelectionBuilder(final List<Type> entities) {
+    SelectionBuilder(final List<T> entities) {
       selection = entities;
     }
 
-    public SelectionBuilder<Type> matching(final Matcher<Type> matcher) {
-      final List<Type> newSelection = new ArrayList<>();
-      for (Type entity : selection) {
+    public SelectionBuilder<T> matching(final Matcher<T> matcher) {
+      final List<T> newSelection = new ArrayList<>();
+      for (T entity : selection) {
         logger.debug("Testing matcher on entity: {}", entity);
         if (matcher.match(entity)) {
           logger.debug("Entity matches");
@@ -158,29 +157,29 @@ public class Registry {
       return this;
     }
 
-    public SelectionBuilder<Type> sortedBy(final Comparator<Type> comparator) {
+    public SelectionBuilder<T> sortedBy(final Comparator<T> comparator) {
       selection.sort(comparator);
       logger.debug("Sorted entities");
       return this;
     }
 
-    public SelectionBuilder<Type> descending() {
+    public SelectionBuilder<T> descending() {
       Collections.reverse(selection);
       logger.debug("Reversed entity order");
       return this;
     }
 
-    public List<Type> get() {
+    public List<T> get() {
       return selection;
     }
 
-    public Type getFirst() {
+    public T getFirst() {
       if (selection.isEmpty()) {
         logger.debug("No entites in this selection; returning null");
         return null;
       }
 
-      final Type first = selection.get(0);
+      final T first = selection.get(0);
       logger.debug("Returning the first entity in selection: {}", first);
       return first;
     }
