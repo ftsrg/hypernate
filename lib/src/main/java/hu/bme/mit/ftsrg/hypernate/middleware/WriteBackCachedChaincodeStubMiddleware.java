@@ -2,6 +2,7 @@
 package hu.bme.mit.ftsrg.hypernate.middleware;
 
 import com.jcabi.aspects.Loggable;
+import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionEnd;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,13 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
     super(next);
   }
 
+  /**
+   * Get the raw state at {@code key} but only call down to the peer if we have not seen the value
+   * at {@code key} before.
+   *
+   * @param key the queried key
+   * @return the raw state at {@code key}
+   */
   @Override
   public byte[] getState(final String key) {
     CachedItem cached = cache.get(key);
@@ -48,6 +56,16 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
     return cached.getValue();
   }
 
+  /**
+   * Write raw state passed in {@code value} at {@code key} but instead of doing it directly, only
+   * update the cache for now.
+   *
+   * <p>The {@link ChaincodeStub#putState(String, byte[])} call will only actually occur during
+   * {@link #dispose()}.
+   *
+   * @param key
+   * @param value
+   */
   @Override
   public void putState(final String key, final byte[] value) {
     CachedItem cached = cache.get(key);
@@ -70,6 +88,14 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
     cached.setValue(value); // Sets the dirty flag if needed
   }
 
+  /**
+   * Delete the value at {@code key} but only mark it as deleted in our cache for now.
+   *
+   * <p>The {@link ChaincodeStub#delState(String)} call will only actually occur during {@link
+   * #dispose()}.
+   *
+   * @param key
+   */
   @Override
   public void delState(final String key) {
     CachedItem cached = cache.get(key);
@@ -86,6 +112,11 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
     cached.delete();
   }
 
+  /**
+   * Apply the cache changes.
+   *
+   * <p>This method should normally be called in a handler for the {@link TransactionEnd} event.
+   */
   public void dispose() {
     for (final Map.Entry<String, CachedItem> entry : cache.entrySet()) {
       final CachedItem item = entry.getValue();

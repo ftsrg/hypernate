@@ -17,5 +17,5 @@ public final class UpdateThrottledChaincodeStubMiddleware extends ChaincodeStubM
     super(nextLayer);
   }
 
-  /* TODO implement ? */
+  /* TODO implement */
 }
