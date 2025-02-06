@@ -44,7 +44,7 @@ public abstract class ChaincodeStubMiddleware implements ChaincodeStub, Hypernat
    * }
    * }</pre>
    *
-   * @param event
+   * @param event event object
    */
   public void onEvent(final HypernateEvent event) {}
 
@@ -54,6 +54,12 @@ public abstract class ChaincodeStubMiddleware implements ChaincodeStub, Hypernat
   /** Convenience method to for handling the {@link TransactionEnd} event. */
   protected void onTransactionEnd() {}
 
+  /**
+   * Handle a {@link HypernateEvent}.
+   *
+   * @apiNote this is an internal method that is only {@code public} for technical reasons
+   * @param event event object
+   */
   @Override
   public void handleEventInternal(HypernateEvent event) {
     if (event instanceof TransactionBegin) {

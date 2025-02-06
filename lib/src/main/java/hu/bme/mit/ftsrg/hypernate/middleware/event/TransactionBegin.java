@@ -1,9 +1,9 @@
 package hu.bme.mit.ftsrg.hypernate.middleware.event;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 
+/** Event that should be fired before any transaction logic is executed. */
 @Value
 @EqualsAndHashCode(callSuper = true)
 public class TransactionBegin extends HypernateEvent {}

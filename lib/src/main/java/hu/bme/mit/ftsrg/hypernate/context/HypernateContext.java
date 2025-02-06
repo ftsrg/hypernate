@@ -2,6 +2,7 @@
 package hu.bme.mit.ftsrg.hypernate.context;
 
 import hu.bme.mit.ftsrg.hypernate.Registry;
+import hu.bme.mit.ftsrg.hypernate.entity.Entity;
 import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddleware;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.HypernateEvent;
 import java.util.LinkedList;
@@ -22,6 +23,13 @@ public class HypernateContext extends Context {
     super(stub);
   }
 
+  /**
+   * Get the {@link Registry} object.
+   *
+   * <p>The {@link Registry} can be used to perform CRUD operations with/on {@link Entity}s.
+   *
+   * @return the registry
+   */
   public Registry getRegistry() {
     return new Registry(getStub());
   }
