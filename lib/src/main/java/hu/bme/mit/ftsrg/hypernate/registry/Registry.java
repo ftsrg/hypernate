@@ -28,7 +28,7 @@ public class Registry {
       throws EntityExistsException, SerializationException {
     assertNotExists(entity);
 
-    final String key = getKey(entity);
+    final String key = key(entity);
     final byte[] buffer = entity.toBuffer();
     stubCallLogger.debug(
         "Calling stub#putState with key={} and value={}", key, Arrays.toString(buffer));
@@ -39,7 +39,7 @@ public class Registry {
       throws EntityNotFoundException, SerializationException {
     assertExists(entity);
 
-    final String key = getKey(entity);
+    final String key = key(entity);
     final byte[] buffer = entity.toBuffer();
     stubCallLogger.debug(
         "Calling stub#putState with key={} and value={}", key, Arrays.toString(buffer));
@@ -49,14 +49,14 @@ public class Registry {
   public <Type extends Entity> void delete(final Type entity) throws EntityNotFoundException {
     assertExists(entity);
 
-    final String key = getKey(entity);
+    final String key = key(entity);
     stubCallLogger.debug("Calling stub#delState with key={}", key);
     stub.delState(key);
   }
 
   public <Type extends Entity> Type read(final Type target)
       throws EntityNotFoundException, SerializationException {
-    final String key = getKey(target);
+    final String key = key(target);
     stubCallLogger.debug("Calling stub#getState with key={}", key);
     final byte[] data = stub.getState(key);
     stubCallLogger.debug("Got data from stub#getState for key={}: {}", key, Arrays.toString(data));
