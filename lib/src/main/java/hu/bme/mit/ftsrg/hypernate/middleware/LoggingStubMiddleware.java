@@ -12,6 +12,7 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
  */
 public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
 
+  /* TODO: SLF4J should be used */
   private final Logger logger;
 
   public LoggingStubMiddleware(final ChaincodeStub next) {
@@ -23,6 +24,12 @@ public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
     this.logger = logger;
   }
 
+  /**
+   * Get the raw state at {@code key} but log a message before and after doing so.
+   *
+   * @param key the queried key
+   * @return the raw state at {@code key}
+   */
   @Override
   public byte[] getState(final String key) {
     logger.log("Getting state for key '{}'", key);
@@ -31,6 +38,13 @@ public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
     return value;
   }
 
+  /**
+   * Write raw state passed in {@code value} at {@code key} but log a message before and after doing
+   * so.
+   *
+   * @param key where to write {@code value}
+   * @param value what to write at {@code key}
+   */
   @Override
   public void putState(final String key, final byte[] value) {
     logger.log("Setting state for key '{}' to have value '{}'", key, Arrays.toString(value));
@@ -38,6 +52,11 @@ public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
     logger.log("Done setting state for key '{}'", key);
   }
 
+  /**
+   * Delete the value at {@code key} but log a message before and after doing so.
+   *
+   * @param key the key whose value should be deleted
+   */
   @Override
   public void delState(final String key) {
     logger.log("Deleting state for key '{}'", key);
