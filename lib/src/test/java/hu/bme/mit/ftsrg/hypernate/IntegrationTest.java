@@ -4,11 +4,10 @@ package hu.bme.mit.ftsrg.hypernate;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
-import hu.bme.mit.ftsrg.hypernate.entity.BasicEntity;
+import hu.bme.mit.ftsrg.hypernate.entity.Entity;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityExistsException;
 import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 import org.hyperledger.fabric.shim.ledger.CompositeKey;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,12 +26,6 @@ class IntegrationTest {
   private Registry registry;
   private TestEntity entity;
 
-  @Data
-  @EqualsAndHashCode(callSuper = true)
-  private static final class TestEntity extends BasicEntity {
-    final int id;
-  }
-
   @BeforeEach
   void setup() {
     registry = new Registry(stub);
@@ -49,5 +42,10 @@ class IntegrationTest {
     registry.create(entity);
 
     then(stub).should().putState(key.toString(), entity.toBuffer());
+  }
+
+  @Data
+  private static final class TestEntity implements Entity {
+    final int id;
   }
 }
