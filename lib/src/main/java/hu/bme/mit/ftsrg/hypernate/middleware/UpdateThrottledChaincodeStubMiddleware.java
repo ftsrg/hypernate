@@ -13,9 +13,5 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
 @Loggable(Loggable.DEBUG)
 public final class UpdateThrottledChaincodeStubMiddleware extends ChaincodeStubMiddleware {
 
-  public UpdateThrottledChaincodeStubMiddleware(ChaincodeStub nextLayer) {
-    super(nextLayer);
-  }
-
   /* TODO implement */
 }

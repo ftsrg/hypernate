@@ -1,8 +1,11 @@
+/* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.contract;
 
 import hu.bme.mit.ftsrg.hypernate.context.HypernateContext;
+import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddlewareChain;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionBegin;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionEnd;
+import java.util.*;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.shim.ChaincodeStub;
@@ -11,8 +14,8 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
 public interface HypernateContract extends ContractInterface {
 
   @Override
-  default Context createContext(ChaincodeStub stub) {
-    return new HypernateContext(stub);
+  default Context createContext(ChaincodeStub fabricStub) {
+    return new HypernateContext(ChaincodeStubMiddlewareChain.emptyChain(fabricStub));
   }
 
   /**
