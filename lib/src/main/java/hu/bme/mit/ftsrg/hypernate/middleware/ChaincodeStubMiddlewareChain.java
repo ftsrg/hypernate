@@ -93,7 +93,7 @@ public class ChaincodeStubMiddlewareChain {
      * @param middlewareClass the type of {@link ChaincodeStubMiddleware} to add -- will be
      *     instantiated using a no-arg constructor
      */
-    public void add(Class<? extends ChaincodeStubMiddleware> middlewareClass) {
+    public Builder add(Class<? extends ChaincodeStubMiddleware> middlewareClass) {
       Constructor<? extends ChaincodeStubMiddleware> constructor;
       try {
         constructor = middlewareClass.getDeclaredConstructor();
@@ -110,6 +110,8 @@ public class ChaincodeStubMiddlewareChain {
 
       middlewareInstance.nextStub = middlewares.isEmpty() ? fabricStub : middlewares.peek();
       middlewares.addFirst(middlewareInstance);
+
+      return this;
     }
 
     /**
