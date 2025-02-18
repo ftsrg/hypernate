@@ -2,7 +2,9 @@
 package hu.bme.mit.ftsrg.hypernate.contract;
 
 import hu.bme.mit.ftsrg.hypernate.context.HypernateContext;
+import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddleware;
 import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddlewareChain;
+import hu.bme.mit.ftsrg.hypernate.middleware.Middleware;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionBegin;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionEnd;
 import java.util.*;
@@ -15,7 +17,7 @@ public interface HypernateContract extends ContractInterface {
 
   @Override
   default Context createContext(ChaincodeStub fabricStub) {
-    return new HypernateContext(ChaincodeStubMiddlewareChain.emptyChain(fabricStub));
+    return new HypernateContext(initMiddlewares(fabricStub));
   }
 
   /**
@@ -40,5 +42,18 @@ public interface HypernateContract extends ContractInterface {
    */
   default void afterTransaction(HypernateContext ctx) {
     ctx.fireEvent(new TransactionEnd());
+  }
+
+  default ChaincodeStubMiddlewareChain initMiddlewares(final ChaincodeStub fabricStub) {
+    Middleware middlewareAnnotation = getClass().getAnnotation(Middleware.class);
+    if (middlewareAnnotation == null) {
+      return ChaincodeStubMiddlewareChain.emptyChain(fabricStub);
+    }
+
+    Class<? extends ChaincodeStubMiddleware>[] middlewareClasses = middlewareAnnotation.value();
+    ChaincodeStubMiddlewareChain.Builder builder = ChaincodeStubMiddlewareChain.builder(fabricStub);
+    Arrays.stream(middlewareClasses).forEach(builder::add);
+
+    return builder.build();
   }
 }
