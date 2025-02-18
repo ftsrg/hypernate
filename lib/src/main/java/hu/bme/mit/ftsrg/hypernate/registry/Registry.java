@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-package hu.bme.mit.ftsrg.hypernate;
+package hu.bme.mit.ftsrg.hypernate.registry;
 
 import com.jcabi.aspects.Loggable;
 import hu.bme.mit.ftsrg.hypernate.entity.Entity;

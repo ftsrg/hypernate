@@ -12,6 +12,7 @@ import hu.bme.mit.ftsrg.hypernate.entity.Entity;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityExistsException;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityNotFoundException;
 import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
+import hu.bme.mit.ftsrg.hypernate.registry.Registry;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;

@@ -1,11 +1,11 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.context;
 
-import hu.bme.mit.ftsrg.hypernate.Registry;
 import hu.bme.mit.ftsrg.hypernate.entity.Entity;
 import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddleware;
 import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddlewareChain;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.HypernateEvent;
+import hu.bme.mit.ftsrg.hypernate.registry.Registry;
 import org.hyperledger.fabric.contract.Context;
 
 /**
