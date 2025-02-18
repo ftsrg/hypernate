@@ -15,12 +15,11 @@ public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
   /* TODO: SLF4J should be used */
   private final Logger logger;
 
-  public LoggingStubMiddleware(final ChaincodeStub next) {
-    this(next, new Logger() {});
+  public LoggingStubMiddleware() {
+    this(new Logger() {});
   }
 
-  public LoggingStubMiddleware(final ChaincodeStub next, final Logger logger) {
-    super(next);
+  public LoggingStubMiddleware(final Logger logger) {
     this.logger = logger;
   }
 
@@ -33,7 +32,7 @@ public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
   @Override
   public byte[] getState(final String key) {
     logger.log("Getting state for key '{}'", key);
-    final byte[] value = this.nextLayer.getState(key);
+    final byte[] value = this.nextStub.getState(key);
     logger.log("Got state for key '{}'; value = '{}'", key, Arrays.toString(value));
     return value;
   }
@@ -48,7 +47,7 @@ public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
   @Override
   public void putState(final String key, final byte[] value) {
     logger.log("Setting state for key '{}' to have value '{}'", key, Arrays.toString(value));
-    this.nextLayer.putState(key, value);
+    this.nextStub.putState(key, value);
     logger.log("Done setting state for key '{}'", key);
   }
 
@@ -60,7 +59,7 @@ public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
   @Override
   public void delState(final String key) {
     logger.log("Deleting state for key '{}'", key);
-    this.nextLayer.delState(key);
+    this.nextStub.delState(key);
     logger.log("Done deleting state for key '{}'", key);
   }
 }

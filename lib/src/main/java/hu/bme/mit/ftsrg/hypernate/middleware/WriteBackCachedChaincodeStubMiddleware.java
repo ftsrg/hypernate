@@ -24,10 +24,6 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
 
   private final Map<String, CachedItem> cache = new HashMap<>();
 
-  public WriteBackCachedChaincodeStubMiddleware(final ChaincodeStub next) {
-    super(next);
-  }
-
   /**
    * Get the raw state at {@code key} but only call down to the peer if we have not seen the value
    * at {@code key} before.
@@ -42,7 +38,7 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
     // New read, add to cache
     if (cached == null) {
       logger.debug("Cache miss for key={} while reading; getting from next layer & caching", key);
-      final byte[] value = this.nextLayer.getState(key);
+      final byte[] value = this.nextStub.getState(key);
       cached = new CachedItem(key, value);
       cache.put(key, cached);
     }
@@ -123,8 +119,8 @@ public final class WriteBackCachedChaincodeStubMiddleware extends ChaincodeStubM
 
       if (item == null || !item.isDirty() || item.getValue() == null) continue;
 
-      if (item.isToDelete()) this.nextLayer.delState(item.getKey());
-      else this.nextLayer.putState(item.getKey(), item.getValue());
+      if (item.isToDelete()) this.nextStub.delState(item.getKey());
+      else this.nextStub.putState(item.getKey(), item.getValue());
     }
   }
 
