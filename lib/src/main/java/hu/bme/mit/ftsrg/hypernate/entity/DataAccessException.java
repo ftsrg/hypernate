@@ -1,14 +1,9 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package hu.bme.mit.ftsrg.hypernate.entity;
 
-/** Base class for {@link Exception}s related to data access problems. */
-public abstract class DataAccessException extends Exception {
+import hu.bme.mit.ftsrg.hypernate.exception.HypernateException;
+import lombok.experimental.StandardException;
 
-  public DataAccessException(final String message) {
-    super(message);
-  }
-
-  public DataAccessException(final String message, final Throwable cause) {
-    super(message, cause);
-  }
-}
+/** Base class for {@link HypernateException}s related to data access problems. */
+@StandardException
+public abstract class DataAccessException extends HypernateException {}
