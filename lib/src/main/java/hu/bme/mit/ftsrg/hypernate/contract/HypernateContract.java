@@ -44,6 +44,18 @@ public interface HypernateContract extends ContractInterface {
     ctx.fireEvent(new TransactionEnd());
   }
 
+  /**
+   * Initialize the middleware chain.
+   *
+   * <p>Normally, Hypernate processes the {@link Middleware} annotation on the contract class if it
+   * exists.
+   *
+   * <p>You can override this behaviour with custom middleware initialization logic by overriding
+   * this method.
+   *
+   * @param fabricStub the stub object provided by Fabric (should normally be the last in the chain)
+   * @return the middleware chain
+   */
   default ChaincodeStubMiddlewareChain initMiddlewares(final ChaincodeStub fabricStub) {
     Middleware middlewareAnnotation = getClass().getAnnotation(Middleware.class);
     if (middlewareAnnotation == null) {
