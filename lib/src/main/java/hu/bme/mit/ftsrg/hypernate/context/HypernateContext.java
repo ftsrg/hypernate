@@ -34,7 +34,7 @@ public class HypernateContext extends Context {
    */
   public Registry getRegistry() {
     if (registry == null) {
-      registry = new Registry(getStub());
+      registry = new Registry(middlewareChain.getFirst());
     }
 
     return registry;
