@@ -20,28 +20,22 @@ public interface HypernateContract extends ContractInterface {
     return new HypernateContext(initMiddlewares(fabricStub));
   }
 
-  /**
-   * Executed before any transaction logic runs.
-   *
-   * <p>When overriding this method, your method body should start with a call to {@code super} if
-   * you want middlewares to receive the {@link TransactionBegin} event.
-   *
-   * @param ctx the Hypernate context
-   */
-  default void beforeTransaction(HypernateContext ctx) {
-    ctx.fireEvent(new TransactionBegin());
+  @Override
+  default void beforeTransaction(Context ctx) {
+    if (ctx instanceof HypernateContext hypCtx) {
+      hypCtx.fireEvent(new TransactionBegin());
+    } else {
+      ContractInterface.super.beforeTransaction(ctx);
+    }
   }
 
-  /**
-   * Executed after transaction logic has finished.
-   *
-   * <p>When overriding this method, your method body should start with a call to {@code super} if
-   * you want middlewares to receive the {@link TransactionBegin} event.
-   *
-   * @param ctx the Hypernate context
-   */
-  default void afterTransaction(HypernateContext ctx) {
-    ctx.fireEvent(new TransactionEnd());
+  @Override
+  default void afterTransaction(Context ctx, Object _result) {
+    if (ctx instanceof HypernateContext hypCtx) {
+      hypCtx.fireEvent(new TransactionEnd());
+    } else {
+      ContractInterface.super.beforeTransaction(ctx);
+    }
   }
 
   /**
