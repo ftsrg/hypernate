@@ -21,12 +21,7 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
 public abstract class ChaincodeStubMiddleware implements ChaincodeStub, HypernateEventHandler {
 
   /** The next {@link ChaincodeStub} in the chain. */
-  @Delegate(types = ChaincodeStub.class)
-  protected final ChaincodeStub nextLayer;
-
-  public ChaincodeStubMiddleware(final ChaincodeStub nextLayer) {
-    this.nextLayer = nextLayer;
-  }
+  @Delegate ChaincodeStub nextStub;
 
   /**
    * Hypernate event listener.
