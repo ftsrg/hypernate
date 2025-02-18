@@ -3,6 +3,9 @@ package hu.bme.mit.ftsrg.hypernate.middleware;
 
 import java.util.Arrays;
 import org.hyperledger.fabric.shim.ChaincodeStub;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 /**
  * Stub middleware that simply logs all {@link ChaincodeStub#getState(String)}, {@link
@@ -12,15 +15,21 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
  */
 public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
 
-  /* TODO: SLF4J should be used */
   private final Logger logger;
 
+  private final Level logLevel;
+
   public LoggingStubMiddleware() {
-    this(new Logger() {});
+    this(LoggerFactory.getLogger(LoggingStubMiddleware.class));
   }
 
   public LoggingStubMiddleware(final Logger logger) {
+    this(logger, Level.INFO);
+  }
+
+  public LoggingStubMiddleware(final Logger logger, final Level logLevel) {
     this.logger = logger;
+    this.logLevel = logLevel;
   }
 
   /**
@@ -31,9 +40,9 @@ public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
    */
   @Override
   public byte[] getState(final String key) {
-    logger.log("Getting state for key '{}'", key);
+    log("Getting state for key '{}'", key);
     final byte[] value = this.nextStub.getState(key);
-    logger.log("Got state for key '{}'; value = '{}'", key, Arrays.toString(value));
+    log("Got state for key '{}'; value = '{}'", key, Arrays.toString(value));
     return value;
   }
 
@@ -46,9 +55,9 @@ public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
    */
   @Override
   public void putState(final String key, final byte[] value) {
-    logger.log("Setting state for key '{}' to have value '{}'", key, Arrays.toString(value));
+    log("Setting state for key '{}' to have value '{}'", key, Arrays.toString(value));
     this.nextStub.putState(key, value);
-    logger.log("Done setting state for key '{}'", key);
+    log("Done setting state for key '{}'", key);
   }
 
   /**
@@ -58,8 +67,12 @@ public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
    */
   @Override
   public void delState(final String key) {
-    logger.log("Deleting state for key '{}'", key);
+    log("Deleting state for key '{}'", key);
     this.nextStub.delState(key);
-    logger.log("Done deleting state for key '{}'", key);
+    log("Done deleting state for key '{}'", key);
+  }
+
+  private void log(final String format, Object... args) {
+    logger.atLevel(logLevel).log(format, args);
   }
 }
