@@ -17,6 +17,8 @@ public class HypernateContext extends Context {
 
   private final ChaincodeStubMiddlewareChain middlewareChain;
 
+  private Registry registry;
+
   public HypernateContext(final ChaincodeStubMiddlewareChain middlewareChain) {
     super(middlewareChain.getFirst());
     this.middlewareChain = middlewareChain;
@@ -31,7 +33,11 @@ public class HypernateContext extends Context {
    * @return the registry
    */
   public Registry getRegistry() {
-    return new Registry(getStub());
+    if (registry == null) {
+      registry = new Registry(getStub());
+    }
+
+    return registry;
   }
 
   /**
