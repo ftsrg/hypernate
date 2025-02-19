@@ -61,41 +61,43 @@ class RegistryTest {
 
     @Test
     void when_create_then_call_putState() throws SerializationException, EntityExistsException {
-      given(entity.getKeyParts()).willReturn(ENTITY_KEY_PARTS);
+      given(entity.getPrimaryKeys()).willReturn(ENTITY_KEY_PARTS);
       given(entity.toBuffer()).willReturn(ENTITY_BUFFER);
       given(stub.createCompositeKey(ENTITY_TYPE, ENTITY_KEY_PARTS))
           .willReturn(ENTITY_COMPOSITE_KEY);
 
-      registry.create(entity);
+      registry.mustCreate(entity);
 
       then(stub).should().putState(ENTITY_COMPOSITE_KEY_STR, ENTITY_BUFFER);
     }
 
     @Test
     void when_update_then_throw_not_found() {
-      given(entity.getKeyParts()).willReturn(ENTITY_KEY_PARTS);
+      given(entity.getPrimaryKeys()).willReturn(ENTITY_KEY_PARTS);
       given(stub.createCompositeKey(ENTITY_TYPE, ENTITY_KEY_PARTS))
           .willReturn(ENTITY_COMPOSITE_KEY);
 
-      assertThrows(EntityNotFoundException.class, () -> registry.update(entity));
+      assertThrows(EntityNotFoundException.class, () -> registry.mustUpdate(entity));
     }
 
     @Test
     void when_delete_then_throw_not_found() {
-      given(entity.getKeyParts()).willReturn(ENTITY_KEY_PARTS);
+      given(entity.getPrimaryKeys()).willReturn(ENTITY_KEY_PARTS);
       given(stub.createCompositeKey(ENTITY_TYPE, ENTITY_KEY_PARTS))
           .willReturn(ENTITY_COMPOSITE_KEY);
 
-      assertThrows(EntityNotFoundException.class, () -> registry.delete(entity));
+      assertThrows(EntityNotFoundException.class, () -> registry.mustDelete(entity));
     }
 
     @Test
     void when_read_then_throw_not_found() {
-      given(entity.getKeyParts()).willReturn(ENTITY_KEY_PARTS);
+      given(entity.getPrimaryKeys()).willReturn(ENTITY_KEY_PARTS);
       given(stub.createCompositeKey(ENTITY_TYPE, ENTITY_KEY_PARTS))
           .willReturn(ENTITY_COMPOSITE_KEY);
 
-      assertThrows(EntityNotFoundException.class, () -> registry.read(entity));
+      assertThrows(
+          EntityNotFoundException.class,
+          () -> registry.mustRead(TestEntity.class, (Object[]) ENTITY_KEY_PARTS));
     }
 
     @Test
@@ -123,7 +125,7 @@ class RegistryTest {
                 }
               });
 
-      List<TestEntity> results = registry.readAll(entity);
+      List<TestEntity> results = registry.readAll(TestEntity.class);
 
       then(stub).should().getStateByPartialCompositeKey(anyString());
       assertTrue(results.isEmpty());
@@ -135,35 +137,35 @@ class RegistryTest {
 
     @Test
     void when_create_then_throw_exists() {
-      given(entity.getKeyParts()).willReturn(ENTITY_KEY_PARTS);
+      given(entity.getPrimaryKeys()).willReturn(ENTITY_KEY_PARTS);
       given(stub.createCompositeKey(ENTITY_TYPE, ENTITY_KEY_PARTS))
           .willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getState(ENTITY_COMPOSITE_KEY_STR)).willReturn(ENTITY_BUFFER);
 
-      assertThrows(EntityExistsException.class, () -> registry.create(entity));
+      assertThrows(EntityExistsException.class, () -> registry.mustCreate(entity));
     }
 
     @Test
     void when_update_then_call_putState() throws SerializationException, EntityNotFoundException {
-      given(entity.getKeyParts()).willReturn(ENTITY_KEY_PARTS);
+      given(entity.getPrimaryKeys()).willReturn(ENTITY_KEY_PARTS);
       given(entity.toBuffer()).willReturn(ENTITY_BUFFER);
       given(stub.createCompositeKey(ENTITY_TYPE, ENTITY_KEY_PARTS))
           .willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getState(ENTITY_COMPOSITE_KEY_STR)).willReturn(ENTITY_BUFFER);
 
-      registry.update(entity);
+      registry.mustUpdate(entity);
 
       then(stub).should().putState(ENTITY_COMPOSITE_KEY_STR, ENTITY_BUFFER);
     }
 
     @Test
     void when_delete_then_call_delState() throws EntityNotFoundException {
-      given(entity.getKeyParts()).willReturn(ENTITY_KEY_PARTS);
+      given(entity.getPrimaryKeys()).willReturn(ENTITY_KEY_PARTS);
       given(stub.createCompositeKey(ENTITY_TYPE, ENTITY_KEY_PARTS))
           .willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getState(ENTITY_COMPOSITE_KEY_STR)).willReturn(ENTITY_BUFFER);
 
-      registry.delete(entity);
+      registry.mustDelete(entity);
 
       then(stub).should().delState(ENTITY_COMPOSITE_KEY_STR);
     }
@@ -171,12 +173,12 @@ class RegistryTest {
     @Test
     void when_read_then_call_getState_and_return_entity()
         throws SerializationException, EntityNotFoundException {
-      given(entity.getKeyParts()).willReturn(ENTITY_KEY_PARTS);
+      given(entity.getPrimaryKeys()).willReturn(ENTITY_KEY_PARTS);
       given(stub.createCompositeKey(ENTITY_TYPE, ENTITY_KEY_PARTS))
           .willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getState(ENTITY_COMPOSITE_KEY_STR)).willReturn(ENTITY_BUFFER);
 
-      TestEntity result = registry.read(entity);
+      TestEntity result = registry.mustRead(TestEntity.class, (Object[]) ENTITY_KEY_PARTS);
 
       then(stub).should().getState(ENTITY_COMPOSITE_KEY_STR);
       assertEquals(result, entity);
@@ -185,7 +187,6 @@ class RegistryTest {
     @Test
     void when_readAll_then_return_one_long_list() throws SerializationException {
       given(entity.getType()).willReturn(ENTITY_TYPE);
-      given(entity.create()).willReturn(entity);
       given(stub.createCompositeKey(ENTITY_TYPE)).willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getStateByPartialCompositeKey(anyString()))
           .willReturn(
@@ -232,7 +233,7 @@ class RegistryTest {
                 }
               });
 
-      List<TestEntity> results = registry.readAll(entity);
+      List<TestEntity> results = registry.readAll(TestEntity.class);
 
       then(stub).should().getStateByPartialCompositeKey(anyString());
       assertEquals(1, results.size());
