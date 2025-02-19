@@ -7,5 +7,5 @@ import java.util.function.Function;
 public @interface AttributeInfo {
   String name();
 
-  Class<? extends Function<?, String>> mapper() default ObjectToString.class;
+  Class<? extends Function<Object, String>> mapper() default ObjectToString.class;
 }

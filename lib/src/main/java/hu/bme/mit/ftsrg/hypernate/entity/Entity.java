@@ -3,12 +3,19 @@ package hu.bme.mit.ftsrg.hypernate.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jcabi.aspects.Loggable;
+import hu.bme.mit.ftsrg.hypernate.annotations.AttributeInfo;
+import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
 import hu.bme.mit.ftsrg.hypernate.util.JSON;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.IntStream;
 import org.hyperledger.fabric.contract.annotation.DataType;
+import org.hyperledger.fabric.shim.ChaincodeStub;
+import org.hyperledger.fabric.shim.ledger.CompositeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +34,48 @@ public interface Entity {
   int padLength = Integer.toString(Integer.MAX_VALUE).length();
 
   /**
+   * Converts the number to text and pads it to a fix length.
+   *
+   * @param num The number to pad.
+   * @return The padded number text.
+   */
+  private static String pad(final int num) {
+    return String.format("%0" + padLength + "d", num);
+  }
+
+  private static String applyAttrMapper(final AttributeInfo attributeInfo, final Object key) {
+    Class<? extends Function<Object, String>> mapperClass = attributeInfo.mapper();
+    Constructor<? extends Function<Object, String>> mapperCtor;
+    try {
+      mapperCtor = mapperClass.getDeclaredConstructor();
+    } catch (NoSuchMethodException e) {
+      logger.error("Could not find no-arg constructor for mapper {}", mapperClass.getName());
+      throw new RuntimeException(e);
+    }
+
+    Function<Object, String> mapper;
+    try {
+      mapper = mapperCtor.newInstance();
+    } catch (InstantiationException e) {
+      logger.error("Failed to instantiate mapper {}", mapperClass.getName());
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      logger.error("Could not access constructor for mapper {}", mapperClass.getName());
+      throw new RuntimeException(e);
+    } catch (InvocationTargetException e) {
+      logger.error(
+          "An exception was thrown by the constructor of mapper {}", mapperClass.getName());
+      throw new RuntimeException(e);
+    }
+    logger.trace(
+        "Successfully instantiated mapper of type {} for primary key attribute {}",
+        mapperClass.getName(),
+        attributeInfo.name());
+
+    return mapper.apply(key);
+  }
+
+  /**
    * Get the type of this entity; essentially a table name.
    *
    * <p>The default is an all-caps string, such as <code>CUSTOMER</code>.
@@ -43,36 +92,58 @@ public interface Entity {
    * Get the composite key for this entity.
    *
    * <p>The composite key is an array of strings comprising the primary key fields of the entity (ie
-   * those annotated with {@link KeyPart}).
-   *
-   * <p>The default implementation takes all fields annotated with {@link KeyPart} in the entity
-   * class, pads them to {@link Entity#padLength} and creates an array from those.
-   *
-   * <p><b>WARNING:</b> the order of keys might matter; this default implementation has not been
-   * tested.
+   * those defined in {@link PrimaryKey}.
    *
    * @return the composite key of this entity
-   * @see Entity#getKeyParts()
    */
   @JsonIgnore
-  default String[] getKeyParts() {
-    // Stream-based implementation replaced with code below to accommodate OpenJML...
-    final List<String> keyParts = new ArrayList<>();
-    for (final Field field : this.getClass().getDeclaredFields()) {
-      logger.debug("Checking if field {} is a key part...", field.getName());
-      field.setAccessible(true);
-      if (field.isAnnotationPresent(KeyPart.class)) {
-        logger.debug("Field {} seems to be a key part; getting its value", field.getName());
-        try {
-          keyParts.add(pad(field.getInt(this)));
-        } catch (IllegalAccessException e) {
-          logger.error("Failed to get the value of a key part", e);
-          throw new RuntimeException(e);
-        }
-      }
+  default String[] getPrimaryKeys() {
+    return Arrays.stream(this.getClass().getAnnotation(PrimaryKey.class).value())
+        .map(
+            attrInfo -> {
+              logger.debug("Processing primary key attribute {}", attrInfo.name());
+              final Object value = getFieldValueForAttr(attrInfo);
+              final String mappedKey = applyAttrMapper(attrInfo, value);
+              logger.debug(
+                  "Result of primary key mapping for attribute {} is {}",
+                  attrInfo.name(),
+                  mappedKey);
+              return mappedKey;
+            })
+        .toArray(String[]::new);
+  }
+
+  @JsonIgnore
+  default String[] getPartialKey(Object... parts) {
+    final AttributeInfo[] attrInfos = this.getClass().getAnnotation(PrimaryKey.class).value();
+    return IntStream.range(0, Math.min(attrInfos.length, parts.length))
+        .mapToObj(i -> applyAttrMapper(attrInfos[i], parts[i]))
+        .toArray(String[]::new);
+  }
+
+  private Object getFieldValueForAttr(final AttributeInfo attrInfo) {
+    final Field field;
+    try {
+      field = getClass().getField(attrInfo.name());
+    } catch (NoSuchFieldException e) {
+      logger.error("Could not find field {} in class {}", attrInfo.name(), getClass().getName());
+      throw new RuntimeException(e);
+    }
+    logger.trace("Found field for primary key attribute {}", attrInfo.name());
+
+    final Object value;
+    try {
+      value = field.get(this);
+    } catch (IllegalAccessException e) {
+      logger.error("Could not access field {} in class {}", field.getName(), getClass().getName());
+      throw new RuntimeException(e);
     }
 
-    return keyParts.toArray(new String[0]);
+    return value;
+  }
+
+  default CompositeKey getCompositeKey(ChaincodeStub stub) {
+    return stub.createCompositeKey(getType(), getPrimaryKeys());
   }
 
   /**
@@ -154,28 +225,5 @@ public interface Entity {
         logger.error("Got exception while trying to access/set a field", e);
       }
     }
-  }
-
-  @JsonIgnore
-  default Entity create() {
-    final Class<? extends Entity> clazz = getClass();
-    try {
-      return clazz.getDeclaredConstructor().newInstance();
-    } catch (NoSuchMethodException
-        | InstantiationException
-        | IllegalAccessException
-        | InvocationTargetException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Converts the number to text and pads it to a fix length.
-   *
-   * @param num The number to pad.
-   * @return The padded number text.
-   */
-  private static String pad(final int num) {
-    return String.format("%0" + padLength + "d", num);
   }
 }
