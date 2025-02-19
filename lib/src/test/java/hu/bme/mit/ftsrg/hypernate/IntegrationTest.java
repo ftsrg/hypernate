@@ -30,23 +30,26 @@ class IntegrationTest {
   @BeforeEach
   void setup() {
     registry = new Registry(stub);
-    entity = new TestEntity(10);
+    entity = new TestEntity(1, 2000, "foo");
   }
 
   @Test
   void given_entity_when_create_then_success()
       throws SerializationException, EntityExistsException {
-    var key = new CompositeKey(entity.getType(), entity.getKeyParts());
+    var key = new CompositeKey(entity.getType(), entity.getPrimaryKeys());
 
-    given(stub.createCompositeKey(entity.getType(), entity.getKeyParts())).willReturn(key);
+    given(stub.createCompositeKey(entity.getType(), entity.getPrimaryKeys())).willReturn(key);
 
-    registry.create(entity);
+    registry.mustCreate(entity);
 
     then(stub).should().putState(key.toString(), entity.toBuffer());
   }
 
   @Data
   private static final class TestEntity implements Entity {
-    final int id;
+
+    final int keyOne;
+    final int keyTwo;
+    final String someStringValue;
   }
 }

@@ -6,7 +6,11 @@ import hu.bme.mit.ftsrg.hypernate.entity.Entity;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityExistsException;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityNotFoundException;
 import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 import org.hyperledger.fabric.shim.ledger.KeyValue;
 import org.slf4j.Logger;
@@ -24,39 +28,121 @@ public class Registry {
     this.stub = stub;
   }
 
-  public <T extends Entity> void create(final T entity)
+  private static <T extends Entity> T instantiateEntity(Class<T> clazz) {
+    Constructor<T> ctor;
+    try {
+      ctor = clazz.getDeclaredConstructor();
+    } catch (NoSuchMethodException e) {
+      classLogger.error("Could not find no-arg constructor for entity {}", clazz.getSimpleName());
+      throw new RuntimeException(e);
+    }
+
+    T entity = null;
+    try {
+      entity = ctor.newInstance();
+    } catch (InstantiationException e) {
+      classLogger.error("Failed to instantiate entity of type {}", clazz.getSimpleName());
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      classLogger.error(
+          "Access denied while instantiating entity of type {}", clazz.getSimpleName());
+      throw new RuntimeException(e);
+    } catch (InvocationTargetException e) {
+      classLogger.error(
+          "Exception occurred while instantiating entity of type {}", clazz.getSimpleName());
+      throw new RuntimeException(e);
+    }
+
+    return entity;
+  }
+
+  private static <T extends Entity> T tryDeserializeEntity(Class<T> clazz, byte[] value) {
+    final T entity = instantiateEntity(clazz);
+
+    try {
+      entity.fromBuffer(value);
+    } catch (SerializationException e) {
+      classLogger.error("Failed to deserialize entity from data: {}", value);
+      throw new RuntimeException(e);
+    }
+    classLogger.debug("Deserialized entity from data: {}", entity);
+
+    return entity;
+  }
+
+  public <T extends Entity> void mustCreate(final T entity)
       throws EntityExistsException, SerializationException {
     assertNotExists(entity);
 
-    final String key = key(entity);
+    final String key = entity.getCompositeKey(stub).toString();
     final byte[] buffer = entity.toBuffer();
+    putState(key, buffer);
+  }
+
+  private void putState(String key, byte[] buffer) {
     stubCallLogger.debug(
         "Calling stub#putState with key={} and value={}", key, Arrays.toString(buffer));
     stub.putState(key, buffer);
   }
 
-  public <T extends Entity> void update(final T entity)
+  public <T extends Entity> void tryCreate(final T entity) {
+    try {
+      mustCreate(entity);
+    } catch (SerializationException | EntityExistsException e) {
+      classLogger.warn(
+          "{} exception ({}) while trying to create {} entity",
+          e.getClass(),
+          e.getLocalizedMessage(),
+          entity.getClass().getSimpleName());
+    }
+  }
+
+  public <T extends Entity> void mustUpdate(final T entity)
       throws EntityNotFoundException, SerializationException {
     assertExists(entity);
 
-    final String key = key(entity);
+    final String key = entity.getCompositeKey(stub).toString();
     final byte[] buffer = entity.toBuffer();
-    stubCallLogger.debug(
-        "Calling stub#putState with key={} and value={}", key, Arrays.toString(buffer));
-    stub.putState(key, buffer);
+    putState(key, buffer);
   }
 
-  public <T extends Entity> void delete(final T entity) throws EntityNotFoundException {
+  public <T extends Entity> void tryUpdate(final T entity) {
+    try {
+      mustUpdate(entity);
+    } catch (SerializationException | EntityNotFoundException e) {
+      classLogger.warn(
+          "{} exception ({}) while trying to update {} entity",
+          e.getClass(),
+          e.getLocalizedMessage(),
+          entity.getClass().getSimpleName());
+    }
+  }
+
+  public <T extends Entity> void mustDelete(final T entity) throws EntityNotFoundException {
     assertExists(entity);
 
-    final String key = key(entity);
+    final String key = entity.getCompositeKey(stub).toString();
     stubCallLogger.debug("Calling stub#delState with key={}", key);
     stub.delState(key);
   }
 
-  public <T extends Entity> T read(final T target)
+  public <T extends Entity> void tryDelete(final T entity) {
+    try {
+      mustDelete(entity);
+    } catch (EntityNotFoundException e) {
+      classLogger.warn(
+          "{} exception ({}) while trying to delete {} entity",
+          e.getClass(),
+          e.getLocalizedMessage(),
+          entity.getClass().getSimpleName());
+    }
+  }
+
+  public <T extends Entity> T mustRead(Class<T> clazz, Object... keys)
       throws EntityNotFoundException, SerializationException {
-    final String key = key(target);
+    T template = instantiateEntity(clazz);
+    final String key =
+        stub.createCompositeKey(template.getType(), template.getPartialKey(keys)).toString();
     stubCallLogger.debug("Calling stub#getState with key={}", key);
     final byte[] data = stub.getState(key);
     stubCallLogger.debug("Got data from stub#getState for key={}: {}", key, Arrays.toString(data));
@@ -65,34 +151,40 @@ public class Registry {
       throw new EntityNotFoundException(key);
     }
 
-    target.fromBuffer(data);
-    classLogger.debug("Deserialized entity from data: {}", target);
-
-    return target;
+    return tryDeserializeEntity(clazz, data);
   }
 
-  public <T extends Entity> List<T> readAll(final T template) throws SerializationException {
-    final List<T> entities = new ArrayList<>();
-    final String compositeKey = stub.createCompositeKey(template.getType()).toString();
-    stubCallLogger.debug(
-        "Calling stub#getStateByPartialCompositeKey with partial key={}", compositeKey);
-    for (KeyValue keyValue : stub.getStateByPartialCompositeKey(compositeKey)) {
-      final byte[] value = keyValue.getValue();
-      classLogger.debug("Found value at partial key={}: {}", compositeKey, Arrays.toString(value));
-      final T entity = (T) template.create();
-      entity.fromBuffer(value);
-      classLogger.debug("Deserialized entity from data: {}", entity);
-      entities.add(entity);
+  public <T extends Entity> T tryRead(Class<T> clazz, Object... keys) {
+    try {
+      return mustRead(clazz, keys);
+    } catch (SerializationException | EntityNotFoundException e) {
+      classLogger.warn(
+          "{} exception ({}) while trying to read {} entity",
+          e.getClass(),
+          e.getLocalizedMessage(),
+          clazz.getSimpleName());
+      return null;
     }
-    classLogger.debug(
-        "Found {} entities in total for partial key={}", entities.size(), compositeKey);
-
-    return entities;
   }
 
-  public <T extends Entity> SelectionBuilder<T> select(final T template)
-      throws SerializationException {
-    return new SelectionBuilder<>(readAll(template));
+  public <T extends Entity> List<T> readAll(final Class<T> clazz) {
+    T template = instantiateEntity(clazz);
+    final String key = stub.createCompositeKey(template.getType()).toString();
+    stubCallLogger.debug("Calling stub#getStateByPartialCompositeKey with partial key={}", key);
+    Iterator<KeyValue> iterator = stub.getStateByPartialCompositeKey(key).iterator();
+    Iterable<KeyValue> iterable = () -> iterator;
+    return StreamSupport.stream(iterable.spliterator(), false)
+        .map(
+            kv -> {
+              final byte[] value = kv.getValue();
+              classLogger.debug(
+                  "Found value at partial key {}: {} -> {}",
+                  key,
+                  kv.getKey(),
+                  Arrays.toString(value));
+              return tryDeserializeEntity(clazz, value);
+            })
+        .collect(Collectors.toList());
   }
 
   @Loggable(Loggable.DEBUG)
@@ -102,86 +194,21 @@ public class Registry {
   }
 
   @Loggable(Loggable.DEBUG)
-  private <T extends Entity> boolean exists(final T obj) {
-    return keyExists(key(obj));
+  private <T extends Entity> boolean exists(final T entity) {
+    return keyExists(entity.getCompositeKey(stub).toString());
   }
 
   @Loggable(Loggable.DEBUG)
-  private <T extends Entity> void assertNotExists(final T obj) throws EntityExistsException {
-    if (exists(obj)) {
-      throw new EntityExistsException(key(obj));
-    }
-  }
-
-  @Loggable(Loggable.DEBUG)
-  private <T extends Entity> void assertExists(final T obj) throws EntityNotFoundException {
-    if (!exists(obj)) {
-      throw new EntityNotFoundException(key(obj));
+  private <T extends Entity> void assertNotExists(final T entity) throws EntityExistsException {
+    if (exists(entity)) {
+      throw new EntityExistsException(entity.getCompositeKey(stub).toString());
     }
   }
 
   @Loggable(Loggable.DEBUG)
-  private <T extends Entity> String key(final T obj) {
-    return stub.createCompositeKey(obj.getType(), obj.getKeyParts()).toString();
-  }
-
-  public interface Matcher<T extends Entity> {
-
-    boolean match(T entity);
-  }
-
-  @Loggable(Loggable.DEBUG)
-  public static final class SelectionBuilder<T extends Entity> {
-
-    private final Logger logger = LoggerFactory.getLogger(SelectionBuilder.class);
-
-    private List<T> selection;
-
-    SelectionBuilder(final List<T> entities) {
-      selection = entities;
-    }
-
-    public SelectionBuilder<T> matching(final Matcher<T> matcher) {
-      final List<T> newSelection = new ArrayList<>();
-      for (T entity : selection) {
-        logger.debug("Testing matcher on entity: {}", entity);
-        if (matcher.match(entity)) {
-          logger.debug("Entity matches");
-          newSelection.add(entity);
-        } else {
-          logger.debug("Entity does not match");
-        }
-      }
-      logger.debug("Matched {} entities in total with matcher", newSelection.size());
-      selection = newSelection;
-      return this;
-    }
-
-    public SelectionBuilder<T> sortedBy(final Comparator<T> comparator) {
-      selection.sort(comparator);
-      logger.debug("Sorted entities");
-      return this;
-    }
-
-    public SelectionBuilder<T> descending() {
-      Collections.reverse(selection);
-      logger.debug("Reversed entity order");
-      return this;
-    }
-
-    public List<T> get() {
-      return selection;
-    }
-
-    public T getFirst() {
-      if (selection.isEmpty()) {
-        logger.debug("No entites in this selection; returning null");
-        return null;
-      }
-
-      final T first = selection.get(0);
-      logger.debug("Returning the first entity in selection: {}", first);
-      return first;
+  private <T extends Entity> void assertExists(final T entity) throws EntityNotFoundException {
+    if (!exists(entity)) {
+      throw new EntityNotFoundException(entity.getCompositeKey(stub).toString());
     }
   }
 }
