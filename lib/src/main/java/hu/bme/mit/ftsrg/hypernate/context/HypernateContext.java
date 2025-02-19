@@ -6,6 +6,10 @@ import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddleware;
 import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddlewareChain;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.HypernateEvent;
 import hu.bme.mit.ftsrg.hypernate.registry.Registry;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.SubmissionPublisher;
 import org.hyperledger.fabric.contract.Context;
 
 /**
@@ -16,6 +20,10 @@ import org.hyperledger.fabric.contract.Context;
 public class HypernateContext extends Context {
 
   private final ChaincodeStubMiddlewareChain middlewareChain;
+
+  private final SubmissionPublisher<HypernateEvent> eventPublisher = new SubmissionPublisher<>();
+
+  private final Queue<HypernateEvent> eventQueue = new LinkedList<>();
 
   private Registry registry;
 
@@ -48,6 +56,10 @@ public class HypernateContext extends Context {
    * @param event the event to fire
    */
   public void fireEvent(final HypernateEvent event) {
-    middlewareChain.forEach(mw -> mw.onEvent(event));
+    eventPublisher.submit(event);
+  }
+
+  public void subscribeToEvents(final Subscriber<HypernateEvent> subscriber) {
+    eventPublisher.subscribe(subscriber);
   }
 }
