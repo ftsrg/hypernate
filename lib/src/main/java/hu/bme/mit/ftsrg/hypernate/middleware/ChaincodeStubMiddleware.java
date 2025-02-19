@@ -3,9 +3,10 @@ package hu.bme.mit.ftsrg.hypernate.middleware;
 
 import com.jcabi.aspects.Loggable;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.HypernateEvent;
-import hu.bme.mit.ftsrg.hypernate.middleware.event.HypernateEventHandler;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionBegin;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionEnd;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
 import lombok.experimental.Delegate;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 
@@ -18,10 +19,36 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
  * access control, caching, etc.
  */
 @Loggable(Loggable.DEBUG)
-public abstract class ChaincodeStubMiddleware implements ChaincodeStub, HypernateEventHandler {
+public abstract class ChaincodeStubMiddleware implements ChaincodeStub, Subscriber<HypernateEvent> {
+
+  protected Subscription eventSubscription;
 
   /** The next {@link ChaincodeStub} in the chain. */
   @Delegate ChaincodeStub nextStub;
+
+  @Override
+  public void onSubscribe(Subscription subscription) {
+    eventSubscription = subscription;
+  }
+
+  @Override
+  public void onNext(HypernateEvent event) {
+    if (event instanceof TransactionBegin) {
+      onTransactionBegin();
+    } else if (event instanceof TransactionEnd) {
+      onTransactionEnd();
+    }
+
+    onEvent(event);
+  }
+
+  @Override
+  public void onError(Throwable throwable) {
+    throwable.printStackTrace();
+  }
+
+  @Override
+  public void onComplete() {}
 
   /**
    * Hypernate event listener.
@@ -48,21 +75,4 @@ public abstract class ChaincodeStubMiddleware implements ChaincodeStub, Hypernat
 
   /** Convenience method to for handling the {@link TransactionEnd} event. */
   protected void onTransactionEnd() {}
-
-  /**
-   * Handle a {@link HypernateEvent}.
-   *
-   * @apiNote this is an internal method that is only {@code public} for technical reasons
-   * @param event event object
-   */
-  @Override
-  public void handleEventInternal(HypernateEvent event) {
-    if (event instanceof TransactionBegin) {
-      onTransactionBegin();
-    } else if (event instanceof TransactionEnd) {
-      onTransactionEnd();
-    }
-
-    onEvent(event);
-  }
 }
