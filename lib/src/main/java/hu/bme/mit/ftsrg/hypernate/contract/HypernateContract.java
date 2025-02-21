@@ -61,7 +61,7 @@ public interface HypernateContract extends ContractInterface {
 
     Class<? extends ChaincodeStubMiddleware>[] middlewareClasses = middlewareAnnotation.value();
     ChaincodeStubMiddlewareChain.Builder builder = ChaincodeStubMiddlewareChain.builder(fabricStub);
-    Arrays.stream(middlewareClasses).forEach(builder::add);
+    Arrays.stream(middlewareClasses).forEach(builder::push);
 
     return builder.build();
   }
