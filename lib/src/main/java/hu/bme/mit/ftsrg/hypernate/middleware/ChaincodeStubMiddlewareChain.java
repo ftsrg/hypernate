@@ -113,9 +113,11 @@ public class ChaincodeStubMiddlewareChain {
         throw new RuntimeException("Failed to instantiate " + middlewareClass, e);
       }
 
-      middlewareInstance.nextStub = middlewares.isEmpty() ? fabricStub : middlewares.get(0);
-      middlewares.add(0, middlewareInstance);
+      return push(middlewareInstance);
+    }
 
+    public Builder push(ChaincodeStubMiddleware middleware) {
+      chainInMiddleware(middleware);
       return this;
     }
 
@@ -127,6 +129,11 @@ public class ChaincodeStubMiddlewareChain {
      */
     public ChaincodeStubMiddlewareChain build() {
       return new ChaincodeStubMiddlewareChain(fabricStub, middlewares);
+    }
+
+    private void chainInMiddleware(ChaincodeStubMiddleware mw) {
+      mw.nextStub = middlewares.isEmpty() ? fabricStub : middlewares.get(0);
+      middlewares.add(0, mw);
     }
   }
 }
