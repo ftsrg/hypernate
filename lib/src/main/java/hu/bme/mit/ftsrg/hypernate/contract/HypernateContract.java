@@ -17,9 +17,9 @@ public interface HypernateContract extends ContractInterface {
 
   @Override
   default Context createContext(ChaincodeStub fabricStub) {
-    ChaincodeStubMiddlewareChain middlwareChain = initMiddlewares(fabricStub);
-    HypernateContext ctx = new HypernateContext(middlwareChain);
-    middlwareChain.forEach(ctx::subscribeToEvents);
+    ChaincodeStubMiddlewareChain mwChain = initMiddlewares(fabricStub);
+    HypernateContext ctx = new HypernateContext(mwChain);
+    mwChain.forEach(ctx::subscribeToEvents);
     return ctx;
   }
 
