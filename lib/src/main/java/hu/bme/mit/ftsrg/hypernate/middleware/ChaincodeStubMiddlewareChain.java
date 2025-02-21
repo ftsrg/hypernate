@@ -27,7 +27,9 @@ public class ChaincodeStubMiddlewareChain {
    * <p>Usage example:
    *
    * <pre>{@code
-   * var chain = ChaincodeStubMiddlewareChain.builder()
+   * // Fabric's stub pass to eg ContractInterface#createContext
+   * ChaincodeStub fabricStub;
+   * var chain = ChaincodeStubMiddlewareChain.builder(fabricStub)
    *                                         .add(WriteBackCachedChaincodeStubMiddleware.class)
    *                                         .add(LoggingStubMiddleware.class)
    *                                         .build();
