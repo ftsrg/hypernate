@@ -3,10 +3,7 @@ package hu.bme.mit.ftsrg.hypernate.middleware;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +27,15 @@ public class ChaincodeStubMiddlewareChain {
    * // Fabric's stub pass to eg ContractInterface#createContext
    * ChaincodeStub fabricStub;
    * var chain = ChaincodeStubMiddlewareChain.builder(fabricStub)
-   *                                         .add(WriteBackCachedChaincodeStubMiddleware.class)
-   *                                         .add(LoggingStubMiddleware.class)
+   *                                         .push(WriteBackCachedChaincodeStubMiddleware.class)
+   *                                         .push(LoggingStubMiddleware.class)
    *                                         .build();
+   * }</pre>
+   *
+   * <p>The resulting stub chain is:
+   *
+   * <pre>{@code
+   * (operations) ... --> LoggingStubMiddleware --> WriteBackCachedChaincodeStubMiddleware --> fabricStub --> ... (peer)
    * }</pre>
    *
    * @param fabricStub the stub object provided by Fabric
@@ -80,7 +83,7 @@ public class ChaincodeStubMiddlewareChain {
 
     private final ChaincodeStub fabricStub;
 
-    private final Deque<ChaincodeStubMiddleware> middlewares = new LinkedList<>();
+    private final List<ChaincodeStubMiddleware> middlewares = new ArrayList<>();
 
     Builder(ChaincodeStub fabricStub) {
       this.fabricStub = fabricStub;
@@ -95,7 +98,7 @@ public class ChaincodeStubMiddlewareChain {
      * @param middlewareClass the type of {@link ChaincodeStubMiddleware} to add -- will be
      *     instantiated using a no-arg constructor
      */
-    public Builder add(Class<? extends ChaincodeStubMiddleware> middlewareClass) {
+    public Builder push(Class<? extends ChaincodeStubMiddleware> middlewareClass) {
       Constructor<? extends ChaincodeStubMiddleware> constructor;
       try {
         constructor = middlewareClass.getDeclaredConstructor();
@@ -110,8 +113,8 @@ public class ChaincodeStubMiddlewareChain {
         throw new RuntimeException("Failed to instantiate " + middlewareClass, e);
       }
 
-      middlewareInstance.nextStub = middlewares.isEmpty() ? fabricStub : middlewares.peek();
-      middlewares.addFirst(middlewareInstance);
+      middlewareInstance.nextStub = middlewares.isEmpty() ? fabricStub : middlewares.get(0);
+      middlewares.add(0, middlewareInstance);
 
       return this;
     }
@@ -119,11 +122,11 @@ public class ChaincodeStubMiddlewareChain {
     /**
      * Build the middleware chain.
      *
-     * @return the middleware chain with all the {@link #add(Class) add}ed {@link
+     * @return the middleware chain with all the {@link #push(Class) add}ed {@link
      *     ChaincodeStubMiddleware}s.
      */
     public ChaincodeStubMiddlewareChain build() {
-      return new ChaincodeStubMiddlewareChain(fabricStub, middlewares.stream().toList());
+      return new ChaincodeStubMiddlewareChain(fabricStub, middlewares);
     }
   }
 }
