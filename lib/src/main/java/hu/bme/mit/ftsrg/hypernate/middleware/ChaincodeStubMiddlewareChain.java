@@ -100,7 +100,7 @@ public class ChaincodeStubMiddlewareChain {
       try {
         constructor = middlewareClass.getDeclaredConstructor();
       } catch (NoSuchMethodException e) {
-        throw new RuntimeException("Could not no-arg constructor for " + middlewareClass, e);
+        throw new RuntimeException("Could not find no-arg constructor for " + middlewareClass, e);
       }
 
       ChaincodeStubMiddleware middlewareInstance;
