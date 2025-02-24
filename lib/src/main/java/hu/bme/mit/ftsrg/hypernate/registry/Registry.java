@@ -56,16 +56,13 @@ public class Registry {
    * @param entity the entity to create
    * @return {@code true} if a new entity was created, {@code false} otherwise
    * @param <T> the entity type
+   * @throws SerializationException if there was an error during serialization
    */
-  public <T> boolean tryCreate(final T entity) {
+  public <T> boolean tryCreate(final T entity) throws SerializationException {
     try {
       mustCreate(entity);
-    } catch (SerializationException | EntityExistsException e) {
-      logger.warn(
-          "{} exception ({}) while trying to create {} entity",
-          e.getClass(),
-          e.getLocalizedMessage(),
-          entity.getClass().getSimpleName());
+    } catch (EntityExistsException e) {
+      logger.warn("{} already exists -- ignoring", entity);
       return false;
     }
 
@@ -95,16 +92,13 @@ public class Registry {
    * @param entity the entity to update
    * @return {@code true} if an entity was updated, {@code false} otherwise
    * @param <T> the entity type
+   * @throws SerializationException if there was an error during serialization
    */
-  public <T> boolean tryUpdate(final T entity) {
+  public <T> boolean tryUpdate(final T entity) throws SerializationException {
     try {
       mustUpdate(entity);
-    } catch (SerializationException | EntityNotFoundException e) {
-      logger.warn(
-          "{} exception ({}) while trying to update {} entity",
-          e.getClass(),
-          e.getLocalizedMessage(),
-          entity.getClass().getSimpleName());
+    } catch (EntityNotFoundException e) {
+      logger.warn("{} does not exist -- ignoring", entity);
       return false;
     }
 
@@ -136,11 +130,7 @@ public class Registry {
     try {
       mustDelete(entity);
     } catch (EntityNotFoundException e) {
-      logger.warn(
-          "{} exception ({}) while trying to delete {} entity",
-          e.getClass(),
-          e.getLocalizedMessage(),
-          entity.getClass().getSimpleName());
+      logger.warn("{} does not exist -- ignoring", entity);
       return false;
     }
 
@@ -173,7 +163,7 @@ public class Registry {
       throw new EntityNotFoundException(key);
     }
 
-    return tryDeserializeEntity(clazz, data);
+    return EntityUtil.fromBuffer(data, clazz);
   }
 
   /**
@@ -183,16 +173,13 @@ public class Registry {
    * @param keys the list of primary keys identifying the entity
    * @return the entity read and deserialized from the ledger if found, {@code null} otherwise
    * @param <T> the entity type
+   * @throws SerializationException if there was an error during deserialization
    */
-  public <T> T tryRead(Class<T> clazz, Object... keys) {
+  public <T> T tryRead(Class<T> clazz, Object... keys) throws SerializationException {
     try {
       return mustRead(clazz, keys);
-    } catch (SerializationException | EntityNotFoundException e) {
-      logger.warn(
-          "{} exception ({}) while trying to read {} entity",
-          e.getClass(),
-          e.getLocalizedMessage(),
-          clazz.getSimpleName());
+    } catch (EntityNotFoundException e) {
+      logger.warn("Entity of type {} with keys {} not found -- ignoring", clazz.getName(), keys);
       return null;
     }
   }
@@ -217,23 +204,13 @@ public class Registry {
                   key,
                   kv.getKey(),
                   Arrays.toString(value));
-              return tryDeserializeEntity(clazz, value);
+              try {
+                return EntityUtil.fromBuffer(value, clazz);
+              } catch (SerializationException e) {
+                throw new RuntimeException(e);
+              }
             })
         .collect(Collectors.toList());
-  }
-
-  private static <T> T tryDeserializeEntity(Class<T> clazz, byte[] value) {
-    final T entity;
-
-    try {
-      entity = EntityUtil.fromBuffer(value, clazz);
-    } catch (SerializationException e) {
-      logger.error("Failed to deserialize entity from data: {}", value);
-      throw new RuntimeException(e);
-    }
-    logger.debug("Deserialized entity from data: {}", entity);
-
-    return entity;
   }
 
   @Loggable(Loggable.DEBUG)
