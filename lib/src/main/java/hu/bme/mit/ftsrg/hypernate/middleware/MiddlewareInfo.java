@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 /** Defines the middleware chain for the contract. */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Middleware {
+public @interface MiddlewareInfo {
   Class<? extends ChaincodeStubMiddleware>[] value();
 }
