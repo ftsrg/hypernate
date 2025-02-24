@@ -156,7 +156,8 @@ public class Registry {
     }
 
     final String key =
-        stub.createCompositeKey(EntityUtil.getType(clazz), EntityUtil.getPartialKey(clazz))
+        stub.createCompositeKey(
+                EntityUtil.getType(clazz), EntityUtil.mapKeyPartsToString(clazz, keyParts))
             .toString();
     final byte[] data = stub.getState(key);
 
