@@ -34,15 +34,30 @@ public class Registry {
     this.stub = stub;
   }
 
+  /**
+   * Create a new entity.
+   *
+   * @param entity the entity to create
+   * @param <T> the entity type
+   * @throws EntityExistsException if the entity already exists in the ledger
+   * @throws SerializationException if there was an error during serialization
+   */
   public <T> void mustCreate(final T entity) throws EntityExistsException, SerializationException {
     assertNotExists(entity);
 
     final String key = getCompositeKey(entity);
     final byte[] buffer = EntityUtil.toBuffer(entity);
-    putState(key, buffer);
+    stub.putState(key, buffer);
   }
 
-  public <T> void tryCreate(final T entity) {
+  /**
+   * Create a new entity unless it already exists.
+   *
+   * @param entity the entity to create
+   * @return {@code true} if a new entity was created, {@code false} otherwise
+   * @param <T> the entity type
+   */
+  public <T> boolean tryCreate(final T entity) {
     try {
       mustCreate(entity);
     } catch (SerializationException | EntityExistsException e) {
@@ -51,19 +66,37 @@ public class Registry {
           e.getClass(),
           e.getLocalizedMessage(),
           entity.getClass().getSimpleName());
+      return false;
     }
+
+    return true;
   }
 
+  /**
+   * Update an existing entity.
+   *
+   * @param entity the entity to update
+   * @param <T> the entity type
+   * @throws EntityNotFoundException if the entity does not yet exist on the ledger
+   * @throws SerializationException if there was an error during serialization
+   */
   public <T> void mustUpdate(final T entity)
       throws EntityNotFoundException, SerializationException {
     assertExists(entity);
 
     final String key = getCompositeKey(entity);
     final byte[] buffer = EntityUtil.toBuffer(entity);
-    putState(key, buffer);
+    stub.putState(key, buffer);
   }
 
-  public <T> void tryUpdate(final T entity) {
+  /**
+   * Update an entity if it exists.
+   *
+   * @param entity the entity to update
+   * @return {@code true} if an entity was updated, {@code false} otherwise
+   * @param <T> the entity type
+   */
+  public <T> boolean tryUpdate(final T entity) {
     try {
       mustUpdate(entity);
     } catch (SerializationException | EntityNotFoundException e) {
@@ -72,9 +105,19 @@ public class Registry {
           e.getClass(),
           e.getLocalizedMessage(),
           entity.getClass().getSimpleName());
+      return false;
     }
+
+    return true;
   }
 
+  /**
+   * Delete an existing entity.
+   *
+   * @param entity the entity to delete
+   * @param <T> the entity type
+   * @throws EntityNotFoundException if the entity was not found in the ledger
+   */
   public <T> void mustDelete(final T entity) throws EntityNotFoundException {
     assertExists(entity);
 
@@ -82,7 +125,14 @@ public class Registry {
     stub.delState(key);
   }
 
-  public <T> void tryDelete(final T entity) {
+  /**
+   * Delete an entity if it exists.
+   *
+   * @param entity the entity to delete
+   * @return {@code true} if an entity was deleted, {@code false} otherwise
+   * @param <T> the entity type
+   */
+  public <T> boolean tryDelete(final T entity) {
     try {
       mustDelete(entity);
     } catch (EntityNotFoundException e) {
@@ -91,9 +141,22 @@ public class Registry {
           e.getClass(),
           e.getLocalizedMessage(),
           entity.getClass().getSimpleName());
+      return false;
     }
+
+    return true;
   }
 
+  /**
+   * Read an existing entity.
+   *
+   * @param clazz the class of the entity
+   * @param keys the list of primary keys identifying the entity
+   * @return the entity read and deserialized from the ledger
+   * @param <T> the entity type
+   * @throws EntityNotFoundException if an entity with the given primary keys was not found
+   * @throws SerializationException if there was an error during deserialization
+   */
   public <T> T mustRead(Class<T> clazz, Object... keys)
       throws EntityNotFoundException, SerializationException {
     if (keys.length != EntityUtil.getPrimaryKeyCount(clazz)) {
@@ -113,6 +176,14 @@ public class Registry {
     return tryDeserializeEntity(clazz, data);
   }
 
+  /**
+   * Read an entity if it exists.
+   *
+   * @param clazz the class of the entity
+   * @param keys the list of primary keys identifying the entity
+   * @return the entity read and deserialized from the ledger if found, {@code null} otherwise
+   * @param <T> the entity type
+   */
   public <T> T tryRead(Class<T> clazz, Object... keys) {
     try {
       return mustRead(clazz, keys);
@@ -126,6 +197,13 @@ public class Registry {
     }
   }
 
+  /**
+   * Read all entities of a given type.
+   *
+   * @param clazz the class of the entity
+   * @return a list of all entities read (might be empty)
+   * @param <T> the entity type
+   */
   public <T> List<T> readAll(final Class<T> clazz) {
     final String key = stub.createCompositeKey(EntityUtil.getType(clazz)).toString();
     Iterator<KeyValue> iterator = stub.getStateByPartialCompositeKey(key).iterator();
@@ -156,10 +234,6 @@ public class Registry {
     logger.debug("Deserialized entity from data: {}", entity);
 
     return entity;
-  }
-
-  private void putState(String key, byte[] buf) {
-    stub.putState(key, buf);
   }
 
   @Loggable(Loggable.DEBUG)
