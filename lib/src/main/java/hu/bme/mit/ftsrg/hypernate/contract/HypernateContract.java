@@ -4,7 +4,7 @@ package hu.bme.mit.ftsrg.hypernate.contract;
 import hu.bme.mit.ftsrg.hypernate.context.HypernateContext;
 import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddleware;
 import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddlewareChain;
-import hu.bme.mit.ftsrg.hypernate.middleware.Middleware;
+import hu.bme.mit.ftsrg.hypernate.middleware.MiddlewareInfo;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionBegin;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionEnd;
 import java.util.*;
@@ -44,8 +44,8 @@ public interface HypernateContract extends ContractInterface {
   /**
    * Initialize the middleware chain.
    *
-   * <p>Normally, Hypernate processes the {@link Middleware} annotation on the contract class if it
-   * exists.
+   * <p>Normally, Hypernate processes the {@link MiddlewareInfo} annotation on the contract class if
+   * it exists.
    *
    * <p>You can override this behaviour with custom middleware initialization logic by overriding
    * this method.
@@ -54,12 +54,12 @@ public interface HypernateContract extends ContractInterface {
    * @return the middleware chain
    */
   default ChaincodeStubMiddlewareChain initMiddlewares(final ChaincodeStub fabricStub) {
-    Middleware middlewareAnnotation = getClass().getAnnotation(Middleware.class);
-    if (middlewareAnnotation == null) {
+    MiddlewareInfo mwInfoAnnot = getClass().getAnnotation(MiddlewareInfo.class);
+    if (mwInfoAnnot == null) {
       return ChaincodeStubMiddlewareChain.emptyChain(fabricStub);
     }
 
-    Class<? extends ChaincodeStubMiddleware>[] middlewareClasses = middlewareAnnotation.value();
+    Class<? extends ChaincodeStubMiddleware>[] middlewareClasses = mwInfoAnnot.value();
     ChaincodeStubMiddlewareChain.Builder builder = ChaincodeStubMiddlewareChain.builder(fabricStub);
     Arrays.stream(middlewareClasses).forEach(builder::push);
 
