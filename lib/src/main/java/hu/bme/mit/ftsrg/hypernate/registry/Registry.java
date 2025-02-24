@@ -6,6 +6,7 @@ import hu.bme.mit.ftsrg.hypernate.annotations.AttributeInfo;
 import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityExistsException;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityNotFoundException;
+import hu.bme.mit.ftsrg.hypernate.entity.MissingPrimaryKeysException;
 import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
 import hu.bme.mit.ftsrg.hypernate.util.JSON;
 import java.lang.reflect.Constructor;
@@ -149,7 +150,13 @@ public class Registry {
    */
   public <T> T mustRead(Class<T> clazz, Object... keyParts)
       throws EntityNotFoundException, SerializationException {
-    if (keyParts.length != EntityUtil.getPrimaryKeyCount(clazz)) {
+    int primaryKeyCount = EntityUtil.getPrimaryKeyCount(clazz);
+    if (primaryKeyCount == 0) {
+      throw new MissingPrimaryKeysException(
+          String.format("%s does not have a primary key annotation", clazz));
+    }
+
+    if (keyParts.length != primaryKeyCount) {
       throw new IllegalArgumentException(
           "The number of key parts provided does not match number of primary keys for "
               + clazz.getName());
@@ -265,7 +272,7 @@ public class Registry {
     }
 
     <T> String[] getPrimaryKeys(final T entity) {
-      return Arrays.stream(entity.getClass().getAnnotation(PrimaryKey.class).value())
+      return Arrays.stream(getPrimaryKeyAnnot(entity.getClass()).value())
           .map(
               attrInfo -> {
                 logger.debug("Processing primary key attribute {}", attrInfo.name());
@@ -285,7 +292,7 @@ public class Registry {
     }
 
     <T> String[] mapKeyPartsToString(final Class<T> clazz, final Object... keyParts) {
-      final AttributeInfo[] attrInfos = clazz.getAnnotation(PrimaryKey.class).value();
+      final AttributeInfo[] attrInfos = getPrimaryKeyAnnot(clazz).value();
       return IntStream.range(0, Math.min(attrInfos.length, keyParts.length))
           .mapToObj(i -> applyAttrMapper(attrInfos[i], keyParts[i]))
           .toArray(String[]::new);
@@ -303,6 +310,16 @@ public class Registry {
 
     <T> String toJson(final T entity) throws SerializationException {
       return JSON.serialize(entity);
+    }
+
+    private <T> PrimaryKey getPrimaryKeyAnnot(final Class<T> clazz) {
+      final PrimaryKey pk = clazz.getAnnotation(PrimaryKey.class);
+      if (pk == null) {
+        throw new MissingPrimaryKeysException(
+            String.format("%s does not have a primary key annotation", clazz));
+      }
+
+      return pk;
     }
 
     private String applyAttrMapper(final AttributeInfo attrInfo, final Object keyPart) {
