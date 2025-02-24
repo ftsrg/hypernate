@@ -62,7 +62,7 @@ public class Registry {
     try {
       mustCreate(entity);
     } catch (EntityExistsException e) {
-      logger.warn("{} already exists -- ignoring", entity);
+      logger.info("{} already exists -- ignoring", entity);
       return false;
     }
 
@@ -98,7 +98,7 @@ public class Registry {
     try {
       mustUpdate(entity);
     } catch (EntityNotFoundException e) {
-      logger.warn("{} does not exist -- ignoring", entity);
+      logger.info("{} does not exist -- ignoring", entity);
       return false;
     }
 
@@ -130,7 +130,7 @@ public class Registry {
     try {
       mustDelete(entity);
     } catch (EntityNotFoundException e) {
-      logger.warn("{} does not exist -- ignoring", entity);
+      logger.info("{} does not exist -- ignoring", entity);
       return false;
     }
 
@@ -179,7 +179,7 @@ public class Registry {
     try {
       return mustRead(clazz, keys);
     } catch (EntityNotFoundException e) {
-      logger.warn("Entity of type {} with keys {} not found -- ignoring", clazz.getName(), keys);
+      logger.info("Entity of type {} with keys {} not found -- ignoring", clazz.getName(), keys);
       return null;
     }
   }
