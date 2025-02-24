@@ -11,6 +11,7 @@ import hu.bme.mit.ftsrg.hypernate.annotations.AttributeInfo;
 import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityExistsException;
 import hu.bme.mit.ftsrg.hypernate.entity.EntityNotFoundException;
+import hu.bme.mit.ftsrg.hypernate.entity.MissingPrimaryKeysException;
 import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
 import hu.bme.mit.ftsrg.hypernate.util.JSON;
 import java.nio.charset.StandardCharsets;
@@ -62,14 +63,31 @@ class RegistryTest {
     registry = new Registry(stub);
   }
 
+  @Test
+  void given_entity_without_primary_keys_when_doing_anything_then_throws_exception() {
+    record KeylessTestEntity(String foo, Integer bar) {}
+    final KeylessTestEntity keylessEntity = new KeylessTestEntity("fooValue", 110);
+
+    assertThrows(MissingPrimaryKeysException.class, () -> registry.mustCreate(keylessEntity));
+    assertThrows(MissingPrimaryKeysException.class, () -> registry.tryCreate(keylessEntity));
+    assertThrows(MissingPrimaryKeysException.class, () -> registry.mustUpdate(keylessEntity));
+    assertThrows(MissingPrimaryKeysException.class, () -> registry.tryUpdate(keylessEntity));
+    assertThrows(MissingPrimaryKeysException.class, () -> registry.mustDelete(keylessEntity));
+    assertThrows(MissingPrimaryKeysException.class, () -> registry.tryDelete(keylessEntity));
+    assertThrows(
+        MissingPrimaryKeysException.class,
+        () -> registry.mustRead(KeylessTestEntity.class, keylessEntity.foo));
+    assertThrows(
+        MissingPrimaryKeysException.class,
+        () -> registry.tryRead(KeylessTestEntity.class, keylessEntity.foo));
+  }
+
   @FieldNameConstants
   @PrimaryKey({
     @AttributeInfo(name = TestEntity.Fields.foo),
     @AttributeInfo(name = TestEntity.Fields.bar)
   })
   private record TestEntity(String foo, Integer bar) {}
-
-  private record KeylessTestEntity(String foo, String bar) {}
 
   @Nested
   class given_empty_ledger {
