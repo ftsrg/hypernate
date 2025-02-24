@@ -26,9 +26,8 @@ import org.slf4j.LoggerFactory;
 @Loggable(Loggable.DEBUG)
 public class Registry {
 
-  private static final Logger classLogger = LoggerFactory.getLogger(Registry.class);
-  private static final Logger stubCallLogger =
-      LoggerFactory.getLogger(Registry.class.getName() + ":StubCalls");
+  private static final Logger logger = LoggerFactory.getLogger(Registry.class);
+
   private final ChaincodeStub stub;
 
   public Registry(final ChaincodeStub stub) {
@@ -47,7 +46,7 @@ public class Registry {
     try {
       mustCreate(entity);
     } catch (SerializationException | EntityExistsException e) {
-      classLogger.warn(
+      logger.warn(
           "{} exception ({}) while trying to create {} entity",
           e.getClass(),
           e.getLocalizedMessage(),
@@ -68,7 +67,7 @@ public class Registry {
     try {
       mustUpdate(entity);
     } catch (SerializationException | EntityNotFoundException e) {
-      classLogger.warn(
+      logger.warn(
           "{} exception ({}) while trying to update {} entity",
           e.getClass(),
           e.getLocalizedMessage(),
@@ -80,7 +79,6 @@ public class Registry {
     assertExists(entity);
 
     final String key = getCompositeKey(entity);
-    stubCallLogger.debug("Calling stub#delState with key={}", key);
     stub.delState(key);
   }
 
@@ -88,7 +86,7 @@ public class Registry {
     try {
       mustDelete(entity);
     } catch (EntityNotFoundException e) {
-      classLogger.warn(
+      logger.warn(
           "{} exception ({}) while trying to delete {} entity",
           e.getClass(),
           e.getLocalizedMessage(),
@@ -106,9 +104,7 @@ public class Registry {
     final String key =
         stub.createCompositeKey(EntityUtil.getType(clazz), EntityUtil.getPartialKey(clazz))
             .toString();
-    stubCallLogger.debug("Calling stub#getState with key={}", key);
     final byte[] data = stub.getState(key);
-    stubCallLogger.debug("Got data from stub#getState for key={}: {}", key, Arrays.toString(data));
 
     if (data == null || data.length == 0) {
       throw new EntityNotFoundException(key);
@@ -121,7 +117,7 @@ public class Registry {
     try {
       return mustRead(clazz, keys);
     } catch (SerializationException | EntityNotFoundException e) {
-      classLogger.warn(
+      logger.warn(
           "{} exception ({}) while trying to read {} entity",
           e.getClass(),
           e.getLocalizedMessage(),
@@ -132,14 +128,13 @@ public class Registry {
 
   public <T> List<T> readAll(final Class<T> clazz) {
     final String key = stub.createCompositeKey(EntityUtil.getType(clazz)).toString();
-    stubCallLogger.debug("Calling stub#getStateByPartialCompositeKey with partial key={}", key);
     Iterator<KeyValue> iterator = stub.getStateByPartialCompositeKey(key).iterator();
     Iterable<KeyValue> iterable = () -> iterator;
     return StreamSupport.stream(iterable.spliterator(), false)
         .map(
             kv -> {
               final byte[] value = kv.getValue();
-              classLogger.debug(
+              logger.debug(
                   "Found value at partial key {}: {} -> {}",
                   key,
                   kv.getKey(),
@@ -155,17 +150,15 @@ public class Registry {
     try {
       entity = EntityUtil.fromBuffer(value, clazz);
     } catch (SerializationException e) {
-      classLogger.error("Failed to deserialize entity from data: {}", value);
+      logger.error("Failed to deserialize entity from data: {}", value);
       throw new RuntimeException(e);
     }
-    classLogger.debug("Deserialized entity from data: {}", entity);
+    logger.debug("Deserialized entity from data: {}", entity);
 
     return entity;
   }
 
   private void putState(String key, byte[] buf) {
-    stubCallLogger.debug(
-        "Calling stub#putState with key={} and value={}", key, Arrays.toString(buf));
     stub.putState(key, buf);
   }
 
