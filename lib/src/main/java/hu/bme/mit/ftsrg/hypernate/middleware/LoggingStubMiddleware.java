@@ -24,7 +24,7 @@ public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
   }
 
   public LoggingStubMiddleware(final Logger logger) {
-    this(logger, Level.INFO);
+    this(logger, Level.DEBUG);
   }
 
   public LoggingStubMiddleware(final Logger logger, final Level logLevel) {
