@@ -21,15 +21,11 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
 @Loggable(Loggable.DEBUG)
 public abstract class ChaincodeStubMiddleware implements ChaincodeStub, Subscriber<HypernateEvent> {
 
-  protected Subscription eventSubscription;
-
   /** The next {@link ChaincodeStub} in the chain. */
   @Delegate ChaincodeStub nextStub;
 
   @Override
-  public void onSubscribe(Subscription subscription) {
-    eventSubscription = subscription;
-  }
+  public void onSubscribe(Subscription subscription) {}
 
   @Override
   public void onNext(HypernateEvent event) {
