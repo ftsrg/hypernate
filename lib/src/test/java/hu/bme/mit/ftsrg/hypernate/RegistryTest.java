@@ -18,6 +18,7 @@ import hu.bme.mit.ftsrg.hypernate.registry.Registry;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nonnull;
 import lombok.experimental.FieldNameConstants;
 import org.hyperledger.fabric.shim.ChaincodeStub;
@@ -85,13 +86,14 @@ class RegistryTest {
     }
 
     @Test
-    void when_try_create_then_call_putState() throws SerializationException {
+    void when_try_create_then_return_true_and_call_putState() throws SerializationException {
       given(stub.createCompositeKey(anyString(), any(String[].class)))
           .willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getState(anyString())).willReturn(new byte[] {});
 
-      registry.tryCreate(entity);
+      boolean result = registry.tryCreate(entity);
 
+      assertTrue(result);
       then(stub).should().putState(eq(ENTITY_COMPOSITE_KEY_STR), any(byte[].class));
       verifyNoMoreInteractions(stub);
     }
@@ -107,12 +109,14 @@ class RegistryTest {
     }
 
     @Test
-    void when_try_update_then_do_nothing() {
+    void when_try_update_then_return_false_and_do_nothing() {
       given(stub.createCompositeKey(anyString(), any(String[].class)))
           .willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getState(anyString())).willReturn(new byte[] {});
 
-      assertDoesNotThrow(() -> registry.tryUpdate(entity));
+      AtomicBoolean result = new AtomicBoolean(false);
+      assertDoesNotThrow(() -> result.set(registry.tryUpdate(entity)));
+      assertFalse(result.get());
       verifyNoMoreInteractions(stub);
     }
 
@@ -127,12 +131,14 @@ class RegistryTest {
     }
 
     @Test
-    void when_try_delete_then_do_nothing() {
+    void when_try_delete_then_return_false_and_do_nothing() {
       given(stub.createCompositeKey(anyString(), any(String[].class)))
           .willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getState(anyString())).willReturn(new byte[] {});
 
-      assertDoesNotThrow(() -> registry.tryDelete(entity));
+      AtomicBoolean result = new AtomicBoolean(false);
+      assertDoesNotThrow(() -> result.set(registry.tryDelete(entity)));
+      assertFalse(result.get());
       verifyNoMoreInteractions(stub);
     }
 
@@ -227,12 +233,14 @@ class RegistryTest {
     }
 
     @Test
-    void when_try_create_then_do_nothing() {
+    void when_try_create_then_return_false_and_do_nothing() {
       given(stub.createCompositeKey(anyString(), any(String[].class)))
           .willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getState(anyString())).willReturn(ENTITY_BUFFER);
 
-      assertDoesNotThrow(() -> registry.tryCreate(entity));
+      AtomicBoolean result = new AtomicBoolean(false);
+      assertDoesNotThrow(() -> result.set(registry.tryCreate(entity)));
+      assertFalse(result.get());
       verifyNoMoreInteractions(stub);
     }
 
@@ -250,13 +258,14 @@ class RegistryTest {
     }
 
     @Test
-    void when_try_update_then_call_putState() throws SerializationException {
+    void when_try_update_then_return_true_and_call_putState() throws SerializationException {
       given(stub.createCompositeKey(anyString(), any(String[].class)))
           .willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getState(anyString())).willReturn(ENTITY_BUFFER);
 
-      registry.tryUpdate(entity);
+      boolean result = registry.tryUpdate(entity);
 
+      assertTrue(result);
       then(stub).should().putState(eq(ENTITY_COMPOSITE_KEY_STR), any(byte[].class));
       verifyNoMoreInteractions(stub);
     }
@@ -274,13 +283,14 @@ class RegistryTest {
     }
 
     @Test
-    void when_try_delete_then_call_delState() throws EntityNotFoundException {
+    void when_try_delete_then_return_true_and_call_delState() throws EntityNotFoundException {
       given(stub.createCompositeKey(anyString(), any(String[].class)))
           .willReturn(ENTITY_COMPOSITE_KEY);
       given(stub.getState(anyString())).willReturn(ENTITY_BUFFER);
 
-      registry.mustDelete(entity);
+      boolean result = registry.tryDelete(entity);
 
+      assertTrue(result);
       then(stub).should().delState(ENTITY_COMPOSITE_KEY_STR);
       verifyNoMoreInteractions(stub);
     }
@@ -359,7 +369,7 @@ class RegistryTest {
         TestEntity result = registry.mustRead(TestEntity.class, entity.foo, entity.bar);
 
         then(stub).should().getState(ENTITY_COMPOSITE_KEY_STR);
-        assertEquals(result, entity);
+        assertEquals(entity, result);
         verifyNoMoreInteractions(stub);
       }
     }
@@ -382,7 +392,7 @@ class RegistryTest {
         TestEntity result = registry.tryRead(TestEntity.class, entity.foo, entity.bar);
 
         then(stub).should().getState(ENTITY_COMPOSITE_KEY_STR);
-        assertEquals(result, entity);
+        assertEquals(entity, result);
         verifyNoMoreInteractions(stub);
       }
     }
