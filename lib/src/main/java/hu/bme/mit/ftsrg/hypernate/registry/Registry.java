@@ -141,17 +141,18 @@ public class Registry {
    * Read an existing entity.
    *
    * @param clazz the class of the entity
-   * @param keys the list of primary keys identifying the entity
+   * @param keyParts the list of primary keys identifying the entity
    * @return the entity read and deserialized from the ledger
    * @param <T> the entity type
    * @throws EntityNotFoundException if an entity with the given primary keys was not found
    * @throws SerializationException if there was an error during deserialization
    */
-  public <T> T mustRead(Class<T> clazz, Object... keys)
+  public <T> T mustRead(Class<T> clazz, Object... keyParts)
       throws EntityNotFoundException, SerializationException {
-    if (keys.length != EntityUtil.getPrimaryKeyCount(clazz)) {
+    if (keyParts.length != EntityUtil.getPrimaryKeyCount(clazz)) {
       throw new IllegalArgumentException(
-          "Partial key array does not match number of primary keys for " + clazz.getName());
+          "The number of key parts provided does not match number of primary keys for "
+              + clazz.getName());
     }
 
     final String key =
@@ -278,14 +279,14 @@ public class Registry {
           .toArray(String[]::new);
     }
 
-    <T> String[] getPartialKey(final T entity, final Object... parts) {
-      return getPartialKey(entity.getClass(), parts);
+    <T> String[] mapKeyPartsToString(final T entity, final Object... keyParts) {
+      return mapKeyPartsToString(entity.getClass(), keyParts);
     }
 
-    <T> String[] getPartialKey(final Class<T> clazz, final Object... parts) {
+    <T> String[] mapKeyPartsToString(final Class<T> clazz, final Object... keyParts) {
       final AttributeInfo[] attrInfos = clazz.getAnnotation(PrimaryKey.class).value();
-      return IntStream.range(0, Math.min(attrInfos.length, parts.length))
-          .mapToObj(i -> applyAttrMapper(attrInfos[i], parts[i]))
+      return IntStream.range(0, Math.min(attrInfos.length, keyParts.length))
+          .mapToObj(i -> applyAttrMapper(attrInfos[i], keyParts[i]))
           .toArray(String[]::new);
     }
 
@@ -303,7 +304,7 @@ public class Registry {
       return JSON.serialize(entity);
     }
 
-    private String applyAttrMapper(final AttributeInfo attrInfo, final Object key) {
+    private String applyAttrMapper(final AttributeInfo attrInfo, final Object keyPart) {
       Class<? extends Function<Object, String>> mapperClass = attrInfo.mapper();
       Constructor<? extends Function<Object, String>> mapperCtor;
       try {
@@ -332,7 +333,7 @@ public class Registry {
           mapperClass.getName(),
           attrInfo.name());
 
-      return mapper.apply(key);
+      return mapper.apply(keyPart);
     }
 
     private <T> Object getFieldValueForAttr(final T ent, final AttributeInfo attrInfo) {
