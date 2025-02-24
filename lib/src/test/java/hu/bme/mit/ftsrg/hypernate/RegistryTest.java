@@ -69,6 +69,8 @@ class RegistryTest {
   })
   private record TestEntity(String foo, Integer bar) {}
 
+  private record KeylessTestEntity(String foo, String bar) {}
+
   @Nested
   class given_empty_ledger {
 
@@ -186,7 +188,8 @@ class RegistryTest {
 
       @Test
       void with_complete_key_then_throw_not_found() {
-        given(stub.createCompositeKey(anyString())).willReturn(ENTITY_COMPOSITE_KEY);
+        given(stub.createCompositeKey(anyString(), any(String[].class)))
+            .willReturn(ENTITY_COMPOSITE_KEY);
         given(stub.getState(anyString())).willReturn(new byte[] {});
 
         assertThrows(
@@ -207,8 +210,9 @@ class RegistryTest {
       }
 
       @Test
-      void with_complete_key_then_return_null() {
-        given(stub.createCompositeKey(anyString())).willReturn(ENTITY_COMPOSITE_KEY);
+      void with_complete_key_then_return_null() throws SerializationException {
+        given(stub.createCompositeKey(anyString(), any(String[].class)))
+            .willReturn(ENTITY_COMPOSITE_KEY);
         given(stub.getState(anyString())).willReturn(new byte[] {});
 
         TestEntity readEntity = registry.tryRead(TestEntity.class, entity.foo, entity.bar);
@@ -363,7 +367,8 @@ class RegistryTest {
       @Test
       void with_complete_key_then_call_getState_and_return_entity()
           throws SerializationException, EntityNotFoundException {
-        given(stub.createCompositeKey(anyString())).willReturn(ENTITY_COMPOSITE_KEY);
+        given(stub.createCompositeKey(anyString(), any(String[].class)))
+            .willReturn(ENTITY_COMPOSITE_KEY);
         given(stub.getState(anyString())).willReturn(ENTITY_BUFFER);
 
         TestEntity result = registry.mustRead(TestEntity.class, entity.foo, entity.bar);
@@ -385,8 +390,9 @@ class RegistryTest {
       }
 
       @Test
-      void with_complete_key_then_call_getState_and_return_entity() {
-        given(stub.createCompositeKey(anyString())).willReturn(ENTITY_COMPOSITE_KEY);
+      void with_complete_key_then_call_getState_and_return_entity() throws SerializationException {
+        given(stub.createCompositeKey(anyString(), any(String[].class)))
+            .willReturn(ENTITY_COMPOSITE_KEY);
         given(stub.getState(anyString())).willReturn(ENTITY_BUFFER);
 
         TestEntity result = registry.tryRead(TestEntity.class, entity.foo, entity.bar);
