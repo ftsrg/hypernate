@@ -37,9 +37,8 @@ public class Registry {
    * @param entity the entity to create
    * @param <T> the entity type
    * @throws EntityExistsException if the entity already exists in the ledger
-   * @throws SerializationException if there was an error during serialization
    */
-  public <T> void mustCreate(final T entity) throws EntityExistsException, SerializationException {
+  public <T> void mustCreate(final T entity) throws EntityExistsException {
     assertNotExists(entity);
 
     final String key = getCompositeKey(entity);
@@ -53,9 +52,8 @@ public class Registry {
    * @param entity the entity to create
    * @return {@code true} if a new entity was created, {@code false} otherwise
    * @param <T> the entity type
-   * @throws SerializationException if there was an error during serialization
    */
-  public <T> boolean tryCreate(final T entity) throws SerializationException {
+  public <T> boolean tryCreate(final T entity) {
     try {
       mustCreate(entity);
     } catch (EntityExistsException e) {
@@ -72,10 +70,8 @@ public class Registry {
    * @param entity the entity to update
    * @param <T> the entity type
    * @throws EntityNotFoundException if the entity does not yet exist on the ledger
-   * @throws SerializationException if there was an error during serialization
    */
-  public <T> void mustUpdate(final T entity)
-      throws EntityNotFoundException, SerializationException {
+  public <T> void mustUpdate(final T entity) throws EntityNotFoundException {
     assertExists(entity);
 
     final String key = getCompositeKey(entity);
@@ -89,9 +85,8 @@ public class Registry {
    * @param entity the entity to update
    * @return {@code true} if an entity was updated, {@code false} otherwise
    * @param <T> the entity type
-   * @throws SerializationException if there was an error during serialization
    */
-  public <T> boolean tryUpdate(final T entity) throws SerializationException {
+  public <T> boolean tryUpdate(final T entity) {
     try {
       mustUpdate(entity);
     } catch (EntityNotFoundException e) {
@@ -142,10 +137,8 @@ public class Registry {
    * @return the entity read and deserialized from the ledger
    * @param <T> the entity type
    * @throws EntityNotFoundException if an entity with the given primary keys was not found
-   * @throws SerializationException if there was an error during deserialization
    */
-  public <T> T mustRead(Class<T> clazz, Object... keyParts)
-      throws EntityNotFoundException, SerializationException {
+  public <T> T mustRead(Class<T> clazz, Object... keyParts) throws EntityNotFoundException {
     int primaryKeyCount = EntityUtil.getPrimaryKeyCount(clazz);
     if (primaryKeyCount == 0) {
       throw new MissingPrimaryKeysException(
@@ -178,9 +171,8 @@ public class Registry {
    * @param keys the list of primary keys identifying the entity
    * @return the entity read and deserialized from the ledger if found, {@code null} otherwise
    * @param <T> the entity type
-   * @throws SerializationException if there was an error during deserialization
    */
-  public <T> T tryRead(Class<T> clazz, Object... keys) throws SerializationException {
+  public <T> T tryRead(Class<T> clazz, Object... keys) {
     try {
       return mustRead(clazz, keys);
     } catch (EntityNotFoundException e) {
@@ -209,11 +201,7 @@ public class Registry {
                   key,
                   kv.getKey(),
                   Arrays.toString(value));
-              try {
-                return EntityUtil.fromBuffer(value, clazz);
-              } catch (SerializationException e) {
-                throw new RuntimeException(e);
-              }
+              return EntityUtil.fromBuffer(value, clazz);
             })
         .collect(Collectors.toList());
   }
@@ -294,17 +282,17 @@ public class Registry {
           .toArray(String[]::new);
     }
 
-    <T> byte[] toBuffer(final T entity) throws SerializationException {
+    <T> byte[] toBuffer(final T entity) {
       return toJson(entity).getBytes(StandardCharsets.UTF_8);
     }
 
-    <T> T fromBuffer(final byte[] buffer, final Class<T> clazz) throws SerializationException {
+    <T> T fromBuffer(final byte[] buffer, final Class<T> clazz) {
       final String json = new String(buffer, StandardCharsets.UTF_8);
       logger.debug("Parsing entity from JSON: {}", json);
       return JSON.deserialize(json, clazz);
     }
 
-    <T> String toJson(final T entity) throws SerializationException {
+    <T> String toJson(final T entity) {
       return JSON.serialize(entity);
     }
 
