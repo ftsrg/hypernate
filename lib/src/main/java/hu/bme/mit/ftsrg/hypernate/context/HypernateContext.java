@@ -3,7 +3,7 @@ package hu.bme.mit.ftsrg.hypernate.context;
 
 import hu.bme.mit.ftsrg.hypernate.middleware.StubMiddleware;
 import hu.bme.mit.ftsrg.hypernate.middleware.StubMiddlewareChain;
-import hu.bme.mit.ftsrg.hypernate.middleware.event.HypernateEvent;
+import hu.bme.mit.ftsrg.hypernate.middleware.notification.HypernateNotification;
 import hu.bme.mit.ftsrg.hypernate.registry.Registry;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,9 +24,9 @@ public class HypernateContext extends Context {
 
   private final StubMiddlewareChain middlewareChain;
 
-  private final List<Subscriber<? super HypernateEvent>> subscribers = new LinkedList<>();
+  private final List<Subscriber<? super HypernateNotification>> subscribers = new LinkedList<>();
 
-  private final Flow.Publisher<HypernateEvent> eventPublisher = subscribers::add;
+  private final Flow.Publisher<HypernateNotification> notificationPublisher = subscribers::add;
 
   @Getter private final Registry registry;
 
@@ -38,17 +38,17 @@ public class HypernateContext extends Context {
   }
 
   /**
-   * Fire a {@link HypernateEvent}.
+   * Send a {@link HypernateNotification}.
    *
    * <p>Notifies all middlewares in the chain (in the order in which they have been added).
    *
-   * @param event the event to fire
+   * @param notification the notification to send
    */
-  public void fireEvent(final HypernateEvent event) {
-    subscribers.forEach(s -> s.onNext(event));
+  public void notify(final HypernateNotification notification) {
+    subscribers.forEach(s -> s.onNext(notification));
   }
 
-  public void subscribeToEvents(final Subscriber<HypernateEvent> subscriber) {
-    eventPublisher.subscribe(subscriber);
+  public void subscribeToNotifications(final Subscriber<HypernateNotification> subscriber) {
+    notificationPublisher.subscribe(subscriber);
   }
 }
