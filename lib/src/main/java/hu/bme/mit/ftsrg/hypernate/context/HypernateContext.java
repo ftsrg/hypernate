@@ -7,7 +7,6 @@ import hu.bme.mit.ftsrg.hypernate.middleware.event.HypernateEvent;
 import hu.bme.mit.ftsrg.hypernate.registry.Registry;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 import lombok.Getter;
@@ -28,8 +27,6 @@ public class HypernateContext extends Context {
   private final List<Subscriber<? super HypernateEvent>> subscribers = new LinkedList<>();
 
   private final Flow.Publisher<HypernateEvent> eventPublisher = subscribers::add;
-
-  private final Queue<HypernateEvent> eventQueue = new LinkedList<>();
 
   @Getter private final Registry registry;
 
