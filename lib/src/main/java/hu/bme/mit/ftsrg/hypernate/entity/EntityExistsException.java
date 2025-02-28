@@ -3,7 +3,7 @@ package hu.bme.mit.ftsrg.hypernate.entity;
 
 import lombok.experimental.StandardException;
 
-/** Exception thrown when the {@link Entity} to create already exists. */
+/** Exception thrown when the entity to create already exists. */
 @StandardException
 public class EntityExistsException extends DataAccessException {
 
