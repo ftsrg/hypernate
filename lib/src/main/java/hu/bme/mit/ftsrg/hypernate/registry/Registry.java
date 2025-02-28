@@ -239,7 +239,7 @@ public class Registry {
   @UtilityClass
   private class EntityUtil {
 
-    Logger logger = LoggerFactory.getLogger(EntityUtil.class);
+    private final Logger logger = LoggerFactory.getLogger(EntityUtil.class);
 
     <T> String getType(final T entity) {
       return getType(entity.getClass());
