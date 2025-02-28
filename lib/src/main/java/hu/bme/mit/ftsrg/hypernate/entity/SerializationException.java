@@ -6,7 +6,7 @@ import lombok.experimental.StandardException;
 
 /**
  * Exception thrown when there was a problem during the serialization or deserialization of an
- * {@link Entity}.
+ * entity.
  */
 @StandardException
 public class SerializationException extends HypernateException {}

@@ -3,7 +3,7 @@ package hu.bme.mit.ftsrg.hypernate.entity;
 
 import lombok.experimental.StandardException;
 
-/** Exception thrown when the queried {@link Entity} could not be found. */
+/** Exception thrown when the queried entity could not be found. */
 @StandardException
 public class EntityNotFoundException extends DataAccessException {
 
