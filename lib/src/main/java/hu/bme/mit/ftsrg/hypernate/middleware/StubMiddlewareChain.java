@@ -5,18 +5,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Consumer;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 
 /** Encapsulating class for a chain of {@link StubMiddleware}s. */
-@Getter
-@RequiredArgsConstructor
-public class StubMiddlewareChain {
-
-  private final ChaincodeStub fabricStub;
-
-  private final List<StubMiddleware> middlewares;
+public record StubMiddlewareChain(ChaincodeStub fabricStub, List<StubMiddleware> middlewares) {
 
   /**
    * Get a builder object for a middleware chain.
