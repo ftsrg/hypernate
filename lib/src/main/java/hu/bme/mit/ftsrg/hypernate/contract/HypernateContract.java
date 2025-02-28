@@ -5,28 +5,28 @@ import hu.bme.mit.ftsrg.hypernate.context.HypernateContext;
 import hu.bme.mit.ftsrg.hypernate.middleware.MiddlewareInfo;
 import hu.bme.mit.ftsrg.hypernate.middleware.StubMiddleware;
 import hu.bme.mit.ftsrg.hypernate.middleware.StubMiddlewareChain;
-import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionBegin;
-import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionEnd;
+import hu.bme.mit.ftsrg.hypernate.middleware.notification.TransactionBegin;
+import hu.bme.mit.ftsrg.hypernate.middleware.notification.TransactionEnd;
 import java.util.*;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 
-/** Contract base class enriched with default before-/after-transaction event handling. */
+/** Contract base class enriched with default before-/after-transaction notification handling. */
 public interface HypernateContract extends ContractInterface {
 
   @Override
   default Context createContext(ChaincodeStub fabricStub) {
     StubMiddlewareChain mwChain = initMiddlewares(fabricStub);
     HypernateContext ctx = new HypernateContext(mwChain);
-    mwChain.forEach(ctx::subscribeToEvents);
+    mwChain.forEach(ctx::subscribeToNotifications);
     return ctx;
   }
 
   @Override
   default void beforeTransaction(Context ctx) {
     if (ctx instanceof HypernateContext hypCtx) {
-      hypCtx.fireEvent(new TransactionBegin());
+      hypCtx.notify(new TransactionBegin());
     } else {
       ContractInterface.super.beforeTransaction(ctx);
     }
@@ -35,7 +35,7 @@ public interface HypernateContract extends ContractInterface {
   @Override
   default void afterTransaction(Context ctx, Object _result) {
     if (ctx instanceof HypernateContext hypCtx) {
-      hypCtx.fireEvent(new TransactionEnd());
+      hypCtx.notify(new TransactionEnd());
     } else {
       ContractInterface.super.beforeTransaction(ctx);
     }

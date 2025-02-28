@@ -2,9 +2,9 @@
 package hu.bme.mit.ftsrg.hypernate.middleware;
 
 import com.jcabi.aspects.Loggable;
-import hu.bme.mit.ftsrg.hypernate.middleware.event.HypernateEvent;
-import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionBegin;
-import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionEnd;
+import hu.bme.mit.ftsrg.hypernate.middleware.notification.HypernateNotification;
+import hu.bme.mit.ftsrg.hypernate.middleware.notification.TransactionBegin;
+import hu.bme.mit.ftsrg.hypernate.middleware.notification.TransactionEnd;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import lombok.experimental.Delegate;
@@ -19,7 +19,7 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
  * access control, caching, etc.
  */
 @Loggable(Loggable.DEBUG)
-public abstract class StubMiddleware implements ChaincodeStub, Subscriber<HypernateEvent> {
+public abstract class StubMiddleware implements ChaincodeStub, Subscriber<HypernateNotification> {
 
   /** The next {@link ChaincodeStub} in the chain. */
   @Delegate ChaincodeStub nextStub;
@@ -28,14 +28,14 @@ public abstract class StubMiddleware implements ChaincodeStub, Subscriber<Hypern
   public void onSubscribe(Subscription subscription) {}
 
   @Override
-  public void onNext(HypernateEvent event) {
-    if (event instanceof TransactionBegin) {
+  public void onNext(HypernateNotification notification) {
+    if (notification instanceof TransactionBegin) {
       onTransactionBegin();
-    } else if (event instanceof TransactionEnd) {
+    } else if (notification instanceof TransactionEnd) {
       onTransactionEnd();
     }
 
-    onEvent(event);
+    onNotification(notification);
   }
 
   @Override
@@ -47,28 +47,29 @@ public abstract class StubMiddleware implements ChaincodeStub, Subscriber<Hypern
   public void onComplete() {}
 
   /**
-   * Hypernate event listener.
+   * Hypernate notification listener.
    *
-   * <p>You can override this method to react to any {@link HypernateEvent}s received. For example:
+   * <p>You can override this method to react to any {@link HypernateNotification}s received. For
+   * example:
    *
    * <pre>{@code
    * @Override
-   * protected void onEvent(final HypernateEvent event) {
-   *   if (event instanceof MyCustomEvent) {
-   *     System.out.println("Handling custom event");
+   * protected void onEvent(final HypernateNotification notification) {
+   *   if (notification instanceof MyCustomNotification) {
+   *     System.out.println("Handling custom notification");
    *   } else {
-   *     System.out.println("Received non-handled event – ignoring it");
+   *     System.out.println("Received non-handled notification – ignoring it");
    *   }
    * }
    * }</pre>
    *
-   * @param event event object
+   * @param notification notification object
    */
-  public void onEvent(final HypernateEvent event) {}
+  public void onNotification(final HypernateNotification notification) {}
 
-  /** Convenience method to for handling the {@link TransactionBegin} event. */
+  /** Convenience method to for handling the {@link TransactionBegin} notification. */
   protected void onTransactionBegin() {}
 
-  /** Convenience method to for handling the {@link TransactionEnd} event. */
+  /** Convenience method to for handling the {@link TransactionEnd} notification. */
   protected void onTransactionEnd() {}
 }
