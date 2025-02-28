@@ -2,7 +2,7 @@
 package hu.bme.mit.ftsrg.hypernate.middleware;
 
 import com.jcabi.aspects.Loggable;
-import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionEnd;
+import hu.bme.mit.ftsrg.hypernate.middleware.notification.TransactionEnd;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -110,7 +110,8 @@ public final class WriteBackCachedStubMiddleware extends StubMiddleware {
   /**
    * Apply the cache changes.
    *
-   * <p>This method should normally be called in a handler for the {@link TransactionEnd} event.
+   * <p>This method should normally be called in a handler for the {@link TransactionEnd}
+   * notification.
    */
   public void dispose() {
     for (final Map.Entry<String, CachedItem> entry : cache.entrySet()) {
