@@ -33,7 +33,7 @@ public class HypernateContext extends Context {
   public HypernateContext(final StubMiddlewareChain middlewareChain) {
     super(middlewareChain.getFirst());
     this.middlewareChain = middlewareChain;
-    this.fabricStub = middlewareChain.getFabricStub();
+    this.fabricStub = middlewareChain.fabricStub();
     this.registry = new Registry(middlewareChain.getFirst());
   }
 
