@@ -65,11 +65,14 @@ public abstract class StubMiddleware implements ChaincodeStub, Subscriber<Hypern
    *
    * @param notification notification object
    */
+  @SuppressWarnings("EmptyMethod")
   public void onNotification(final HypernateNotification notification) {}
 
   /** Convenience method to for handling the {@link TransactionBegin} notification. */
+  @SuppressWarnings("EmptyMethod")
   protected void onTransactionBegin() {}
 
   /** Convenience method to for handling the {@link TransactionEnd} notification. */
+  @SuppressWarnings("EmptyMethod")
   protected void onTransactionEnd() {}
 }
