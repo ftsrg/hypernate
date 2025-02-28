@@ -90,7 +90,7 @@ public class Registry {
     try {
       mustUpdate(entity);
     } catch (EntityNotFoundException e) {
-      logger.info("{} does not exist -- ignoring", entity);
+      logger.info("{} does not exist -- ignoring update", entity);
       return false;
     }
 
@@ -122,7 +122,7 @@ public class Registry {
     try {
       mustDelete(entity);
     } catch (EntityNotFoundException e) {
-      logger.info("{} does not exist -- ignoring", entity);
+      logger.info("{} does not exist -- ignoring delete", entity);
       return false;
     }
 
