@@ -3,7 +3,7 @@ package hu.bme.mit.ftsrg.hypernate.util;
 
 import static org.assertj.core.api.Assertions.*;
 
-import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
+import hu.bme.mit.ftsrg.hypernate.registry.SerializationException;
 import org.junit.jupiter.api.Test;
 
 public class JSONTest {

@@ -9,11 +9,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import hu.bme.mit.ftsrg.hypernate.annotations.AttributeInfo;
 import hu.bme.mit.ftsrg.hypernate.annotations.PrimaryKey;
-import hu.bme.mit.ftsrg.hypernate.entity.EntityExistsException;
-import hu.bme.mit.ftsrg.hypernate.entity.EntityNotFoundException;
-import hu.bme.mit.ftsrg.hypernate.entity.MissingPrimaryKeysException;
-import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
+import hu.bme.mit.ftsrg.hypernate.registry.EntityExistsException;
+import hu.bme.mit.ftsrg.hypernate.registry.EntityNotFoundException;
+import hu.bme.mit.ftsrg.hypernate.registry.MissingPrimaryKeysException;
 import hu.bme.mit.ftsrg.hypernate.registry.Registry;
+import hu.bme.mit.ftsrg.hypernate.registry.SerializationException;
 import hu.bme.mit.ftsrg.hypernate.util.JSON;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
