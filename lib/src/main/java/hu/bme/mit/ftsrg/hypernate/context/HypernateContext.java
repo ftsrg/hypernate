@@ -22,7 +22,7 @@ public class HypernateContext extends Context {
 
   @Getter private final ChaincodeStub fabricStub;
 
-  private final StubMiddlewareChain middlewareChain;
+  @Getter private final StubMiddlewareChain middlewareChain;
 
   private final List<Subscriber<? super HypernateNotification>> subscribers = new LinkedList<>();
 
