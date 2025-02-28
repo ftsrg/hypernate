@@ -19,7 +19,7 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
  * access control, caching, etc.
  */
 @Loggable(Loggable.DEBUG)
-public abstract class ChaincodeStubMiddleware implements ChaincodeStub, Subscriber<HypernateEvent> {
+public abstract class StubMiddleware implements ChaincodeStub, Subscriber<HypernateEvent> {
 
   /** The next {@link ChaincodeStub} in the chain. */
   @Delegate ChaincodeStub nextStub;
