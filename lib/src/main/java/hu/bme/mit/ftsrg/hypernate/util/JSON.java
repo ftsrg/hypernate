@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.jcabi.aspects.Loggable;
-import hu.bme.mit.ftsrg.hypernate.entity.SerializationException;
+import hu.bme.mit.ftsrg.hypernate.registry.SerializationException;
 import java.io.IOException;
 import lombok.experimental.UtilityClass;
 
