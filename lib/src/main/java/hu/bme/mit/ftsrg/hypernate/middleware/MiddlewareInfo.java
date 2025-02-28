@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MiddlewareInfo {
-  Class<? extends ChaincodeStubMiddleware>[] value();
+  Class<? extends StubMiddleware>[] value();
 }

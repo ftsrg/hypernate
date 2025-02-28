@@ -11,9 +11,9 @@ import org.slf4j.event.Level;
  * Stub middleware that simply logs all {@link ChaincodeStub#getState(String)}, {@link
  * ChaincodeStub#putState(String, byte[])}, and {@link ChaincodeStub#delState(String)} calls.
  *
- * @see ChaincodeStubMiddleware
+ * @see StubMiddleware
  */
-public class LoggingStubMiddleware extends ChaincodeStubMiddleware {
+public class LoggingStubMiddleware extends StubMiddleware {
 
   private final Logger logger;
 

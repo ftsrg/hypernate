@@ -2,9 +2,9 @@
 package hu.bme.mit.ftsrg.hypernate.contract;
 
 import hu.bme.mit.ftsrg.hypernate.context.HypernateContext;
-import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddleware;
-import hu.bme.mit.ftsrg.hypernate.middleware.ChaincodeStubMiddlewareChain;
 import hu.bme.mit.ftsrg.hypernate.middleware.MiddlewareInfo;
+import hu.bme.mit.ftsrg.hypernate.middleware.StubMiddleware;
+import hu.bme.mit.ftsrg.hypernate.middleware.StubMiddlewareChain;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionBegin;
 import hu.bme.mit.ftsrg.hypernate.middleware.event.TransactionEnd;
 import java.util.*;
@@ -17,7 +17,7 @@ public interface HypernateContract extends ContractInterface {
 
   @Override
   default Context createContext(ChaincodeStub fabricStub) {
-    ChaincodeStubMiddlewareChain mwChain = initMiddlewares(fabricStub);
+    StubMiddlewareChain mwChain = initMiddlewares(fabricStub);
     HypernateContext ctx = new HypernateContext(mwChain);
     mwChain.forEach(ctx::subscribeToEvents);
     return ctx;
@@ -53,14 +53,14 @@ public interface HypernateContract extends ContractInterface {
    * @param fabricStub the stub object provided by Fabric (should normally be the last in the chain)
    * @return the middleware chain
    */
-  default ChaincodeStubMiddlewareChain initMiddlewares(final ChaincodeStub fabricStub) {
+  default StubMiddlewareChain initMiddlewares(final ChaincodeStub fabricStub) {
     MiddlewareInfo mwInfoAnnot = getClass().getAnnotation(MiddlewareInfo.class);
     if (mwInfoAnnot == null) {
-      return ChaincodeStubMiddlewareChain.emptyChain(fabricStub);
+      return StubMiddlewareChain.emptyChain(fabricStub);
     }
 
-    Class<? extends ChaincodeStubMiddleware>[] middlewareClasses = mwInfoAnnot.value();
-    ChaincodeStubMiddlewareChain.Builder builder = ChaincodeStubMiddlewareChain.builder(fabricStub);
+    Class<? extends StubMiddleware>[] middlewareClasses = mwInfoAnnot.value();
+    StubMiddlewareChain.Builder builder = StubMiddlewareChain.builder(fabricStub);
     Arrays.stream(middlewareClasses).forEach(builder::push);
 
     return builder.build();
