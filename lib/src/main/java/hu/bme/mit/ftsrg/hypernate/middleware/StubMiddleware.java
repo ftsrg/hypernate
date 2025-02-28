@@ -9,6 +9,8 @@ import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import lombok.experimental.Delegate;
 import org.hyperledger.fabric.shim.ChaincodeStub;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link ChaincodeStub} middlewares to be chained.
@@ -20,6 +22,8 @@ import org.hyperledger.fabric.shim.ChaincodeStub;
  */
 @Loggable(Loggable.DEBUG)
 public abstract class StubMiddleware implements ChaincodeStub, Subscriber<HypernateNotification> {
+
+  private final Logger logger = LoggerFactory.getLogger(StubMiddleware.class);
 
   /** The next {@link ChaincodeStub} in the chain. */
   @Delegate ChaincodeStub nextStub;
@@ -40,7 +44,7 @@ public abstract class StubMiddleware implements ChaincodeStub, Subscriber<Hypern
 
   @Override
   public void onError(Throwable throwable) {
-    throwable.printStackTrace();
+    logger.error(throwable.getMessage(), throwable);
   }
 
   @Override
