@@ -58,8 +58,8 @@ public final class WriteBackCachedStubMiddleware extends StubMiddleware {
    * <p>The {@link ChaincodeStub#putState(String, byte[])} call will only actually occur during
    * {@link #dispose()}.
    *
-   * @param key
-   * @param value
+   * @param key the key to write
+   * @param value the value to write at the key
    */
   @Override
   public void putState(final String key, final byte[] value) {
@@ -89,7 +89,7 @@ public final class WriteBackCachedStubMiddleware extends StubMiddleware {
    * <p>The {@link ChaincodeStub#delState(String)} call will only actually occur during {@link
    * #dispose()}.
    *
-   * @param key
+   * @param key the key to delete
    */
   @Override
   public void delState(final String key) {
