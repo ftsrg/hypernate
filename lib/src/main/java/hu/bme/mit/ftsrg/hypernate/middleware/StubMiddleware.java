@@ -37,9 +37,9 @@ public abstract class StubMiddleware implements ChaincodeStub, Subscriber<Hypern
       onTransactionBegin();
     } else if (notification instanceof TransactionEnd) {
       onTransactionEnd();
+    } else {
+      onNotification(notification);
     }
-
-    onNotification(notification);
   }
 
   @Override
