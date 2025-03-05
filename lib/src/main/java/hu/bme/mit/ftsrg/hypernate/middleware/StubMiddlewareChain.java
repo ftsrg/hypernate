@@ -48,15 +48,19 @@ public record StubMiddlewareChain(ChaincodeStub fabricStub, List<StubMiddleware>
   }
 
   /**
-   * Get the first {@link StubMiddleware} in the chain.
+   * Get the first {@link ChaincodeStub} in the chain.
    *
    * <p>The <i>first</i> is the one handling stub methods <i>first</i>. After that follow the rest
    * of the chain, and, finally, the Fabric stub.
    *
-   * @return the first middleware in the chain
+   * @return the first middleware in the chain or the Fabric stub if there are no middleware
    */
-  public StubMiddleware getFirst() {
-    return middlewares.get(0);
+  public ChaincodeStub getFirst() {
+    if (middlewares.isEmpty()) {
+      return fabricStub;
+    } else {
+      return middlewares.get(0);
+    }
   }
 
   /**
