@@ -1,14 +1,16 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-package hu.bme.mit.ftsrg.hypernate.mappers;
+package hu.bme.mit.ftsrg.hypernate.mappers; 
 
-import java.util.function.Function;
-
-public class IntegerZeroPadder implements Function<Integer, String> {
+public class IntegerZeroPadder implements AttributeMapper {
   private static final String FORMAT_STRING =
       "%0" + String.valueOf(Integer.MAX_VALUE).length() + "d";
 
   @Override
-  public String apply(Integer integer) {
-    return String.format(IntegerZeroPadder.FORMAT_STRING, integer);
+  public String apply(Object object) {
+    if (object instanceof Integer integer && integer >= 0) {
+      return String.format(IntegerZeroPadder.FORMAT_STRING, integer);
+    }
+
+    throw new IllegalArgumentException("The IntegerZeroPadder attribute mapper only supports positive integer intputs");
   }
 }
