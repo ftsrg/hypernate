@@ -224,12 +224,12 @@ Damaris Jepkurui Kangogo, Bertalan Zoltán Péter, Attila Klenik, Imre Kocsis. _
 
 BibTeX:
 ```
-@article{kangogo2024practical,
+@unpublished{kangogo2024practical,
   title={Practical runtime verification of cross-organizational smart contracts},
   author={Kangogo, Damaris Jepkurui and Péter, Bertalan Zoltán and Klenik, Attila and Kocsis, Imre},
   year={2024},
-  doi={https://dx.doi.org/10.21203/rs.3.rs-4606405/v1},
-  url={https://www.researchsquare.com/article/rs-4606405/latest}
+  note={Preprint at \url{https://www.researchsquare.com/article/rs-4606405/latest}},
+  doi={10.21203/rs.3.rs-4606405/v1}
 }
 ```
 
