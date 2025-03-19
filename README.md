@@ -3,7 +3,7 @@
 If Fabric allows you to keep your familiar programming language, then Hypernate will allow you to _keep your familiar programming style._
 
 No more low-level boilerplate code for key-value storage operations and other housekeeping tasks!
-Take advantage of Hypernate's _high abstraction level,_ _aspect-oriented_ approaches and _extensibility_ to keep your critical business logic as clean as possible!
+Take advantage of Hypernate’s _high abstraction level,_ _aspect-oriented_ approaches and _extensibility_ to keep your critical business logic as clean as possible!
 
 Enhance your chaincode with feaures, like:
 * Object-oriented CRUD (create, read, update, delete) operations with explicit semantics
@@ -21,9 +21,9 @@ And more features are on the way, so spoiler ahead:
 * Overall friendlier query support
 * OpenTelemetry integration
 * Support for data schemas
-* ...
+* …
 
-## Users' Guide
+## Users’ Guide
 
 For complete examples, please refer to the [hypernate-samples](https://github.com/ftsrg/hypernate-samples) repository.
 The following sections introduce the individual features only in an isolated manner.
@@ -43,8 +43,8 @@ The gist of using Hypernate features is the following:
 Why would you mix Fabric-related storage information with your business data? Keep them close - but separated - using the `PrimaryKey` attribute!
 
 The following code snippet:
-* Uses Hypernate's `PrimaryKey` annotation to declare a composite key for the entity using an _ordered list_ of `AttributeInfo` parts.
-* (Optional) Uses `lombok`'s `FieldNameConstants` annotation, so you can reference field names in a type-safe way!
+* Uses Hypernate’s `PrimaryKey` annotation to declare a composite key for the entity using an _ordered list_ of `AttributeInfo` parts.
+* (Optional) Uses `lombok`’s `FieldNameConstants` annotation, so you can reference field names in a type-safe way!
 
 ```java
 @FieldNameConstants
@@ -62,9 +62,9 @@ public record Asset(
 In the end, Fabric expects a string value as an entity key and the previous example used a string valued attribute as key (part), so all is good (hopefully).
 But what if our ID-like attributes are not strings?
 For example, you would like to use a monotonic counter as entity ID (or just part of it).
-You might ask: "Why doesn't Hypernate just `toString` it?" 
+You might ask: “Why doesn’t Hypernate just `toString` it?”
 
-Let's see what happens when we `toString` a few ID-like numbers:
+Let’s see what happens when we `toString` a few ID-like numbers:
 * Original number sequence: `9`, `10`, `11`
 * `toString` results: `"9"`, `"10"`, `"11"`
 * Lexicographically ordered keys in Fabric: `"10"`, `"11"`, `"9"`
@@ -74,14 +74,14 @@ Well, they are still there, but might produce **semantically incorrect** results
 
 How would you solve this problem? By a smarter `toString` implementation, of course!
 The new implementation should produce the following, order-friendly strings (or something like that):
-* `"009"`, `"010"`, `"011"`, ...
+* `"009"`, `"010"`, `"011"`, …
 
 Generalizing this idea, Hypernate gives you the opportunity to declare attribute value **mappers** to manipulate an attribute value before it is used in key construction.
 
 The following code snippet:
-* Uses Hypernate's `PrimaryKey` annotation to declare a composite key for the entity using an _ordered list_ of `AttributeInfo` parts.
+* Uses Hypernate’s `PrimaryKey` annotation to declare a composite key for the entity using an _ordered list_ of `AttributeInfo` parts.
 * Declares the class `IntegerZeroPadder` as the mapper for the attribute value to retain the correct ordering of resulting key part strings.
-* (Optional) Uses `lombok`'s `FieldNameConstants` annotation, so you can reference field names in a type-safe way! 
+* (Optional) Uses `lombok`’s `FieldNameConstants` annotation, so you can reference field names in a type-safe way! 
 
 ```java
 @FieldNameConstants
@@ -109,11 +109,11 @@ Fabric composite keys can be defined using multiple attribute values, as often n
 Naturally, Hypernate also supports such declarations!
 
 The following code snippet:
-* Uses Hypernate's `PrimaryKey` annotation to declare a composite key for the entity using an _ordered list_ of `AttributeInfo` parts:
-  * Uses Hypernate's `AttributeInfo` annotation to declare the first composite key part as the `owner` attribute value, because we would like to run partial queries based on this attribute value of each asset.
-  * Uses Hypernate's `AttributeInfo` annotation to declare the second composite key part as the `assetID` attribute value.
+* Uses Hypernate’s `PrimaryKey` annotation to declare a composite key for the entity using an _ordered list_ of `AttributeInfo` parts:
+  * Uses Hypernate’s `AttributeInfo` annotation to declare the first composite key part as the `owner` attribute value, because we would like to run partial queries based on this attribute value of each asset.
+  * Uses Hypernate’s `AttributeInfo` annotation to declare the second composite key part as the `assetID` attribute value.
     * Declares the class `IntegerZeroPadder` as the mapper for the attribute value to retain the correct ordering of resulting key part strings.
-* (Optional) Uses `lombok`'s `FieldNameConstants` annotation, so you can reference field names in a type-safe way! 
+* (Optional) Uses `lombok`’s `FieldNameConstants` annotation, so you can reference field names in a type-safe way! 
 
 ```java
 @FieldNameConstants
@@ -132,7 +132,7 @@ public record Asset(
 > [!CAUTION] 
 > This key space design means that you must know **both** the `owner` and `assetID` values to access (for example, read or delete) an asset on the ledger.
 > This is not necessarily optimal, we only did this to support partial queries for the asset.
-> The upcoming **query index definition** capability of Hypernate will solve this problem by automatically managing "query-enabling" key spaces separately from primary key definitions.
+> The upcoming **query index definition** capability of Hypernate will solve this problem by automatically managing “query-enabling” key spaces separately from primary key definitions.
 > _So stay tuned for exciting new features!_
 
 ### CRUD operations
@@ -169,11 +169,11 @@ The systems engineering world extracted these repeating tasks and packaged them 
 Middlewares are fully functional services that are usually application-independent, thus reusable across applications. 
 
 Hypernate also identified some repeating, application-independent tasks around the Fabric `ChaincodeStub` that might be handy across different projects.
-What's more, you can chain more middlewares together, similarly to web server middlewares!
+What’s more, you can chain more middlewares together, similarly to web server middlewares!
 Cherry-pick your middlewares to easily shape the feature set of your chaincode.
 
 Currently, the following middlewares are available (with more on the way!):
-* `LoggingStubMiddleware`: wraps popular ledger access operations with logging, so you always know what's happening between your business logic and ledger.
+* `LoggingStubMiddleware`: wraps popular ledger access operations with logging, so you always know what’s happening between your business logic and ledger.
 * `WriteBackCachedStubMiddleware`: implements caching of raw ledger entries to lower the traffic between the chaincode and the peer, and also to support the _read-your-own-write_ data access semantic. 
 
 The following code snippet shows:
@@ -189,13 +189,13 @@ public class MyBusinessContract implements HypernateContract
 ```
 
 The above declaration will result in two ChaincodeStub-like components intercepting every call you make to the Fabric stub, _first_ adding some logging functionality, _then_ checking the cache for the entries you want to access.
-So it is possible that the original stub won't even get the call, it is served from the local cache.
+So it is possible that the original stub won’t even get the call, it is served from the local cache.
 
 > [!IMPORTANT] 
 > Hypernate context and middleware instances are specific to your individual TX executions/endoresements!
 > Hypernate does not introduce dependencies between TXs, following the traditional (and important!) Fabric chaincode development practice.
 
-## Developers' Guide
+## Developers’ Guide
 
 The preferred way of contribution is:
 
@@ -217,7 +217,7 @@ BibTeX:
 ```
 @article{kangogo2024practical,
   title={Practical runtime verification of cross-organizational smart contracts},
-  author={Kangogo, Damaris Jepkurui and P{\'e}ter, Bertalan Zolt{\'a}n and Klenik, Attila and Kocsis, Imre},
+  author={Kangogo, Damaris Jepkurui and Péter, Bertalan Zoltán and Klenik, Attila and Kocsis, Imre},
   year={2024},
   doi={https://dx.doi.org/10.21203/rs.3.rs-4606405/v1},
   url={https://www.researchsquare.com/article/rs-4606405/latest}
