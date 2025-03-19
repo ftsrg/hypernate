@@ -23,7 +23,7 @@ And more features are on the way, so spoiler ahead:
 * Support for data schemas
 * …
 
-## Users’ Guide
+## User Guide
 
 For complete examples, please refer to the [hypernate-samples](https://github.com/ftsrg/hypernate-samples) repository.
 The following sections introduce the individual features only in an isolated manner.
@@ -195,7 +195,7 @@ So it is possible that the original stub won’t even get the call, it is served
 > Hypernate context and middleware instances are specific to your individual TX executions/endoresements!
 > Hypernate does not introduce dependencies between TXs, following the traditional (and important!) Fabric chaincode development practice.
 
-## Developers’ Guide
+## Developer Guide
 
 The preferred way of contribution is:
 
