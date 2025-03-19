@@ -8,7 +8,7 @@ Take advantage of Hypernate’s _high abstraction level,_ _aspect-oriented_ appr
 Enhance your chaincode with feaures, like:
 * Object-oriented CRUD (create, read, update, delete) operations with explicit semantics
 * Declarative and flexible configuration of your entity keys
-* An extensible chain of middlewares handling non-business stuff (caching, logging, tracing, etc.)
+* An extensible chain of middleware processors handling non-business stuff (caching, logging, tracing, etc.)
 
 Get access to all these features using a simple incantation:
 ```java
@@ -167,22 +167,22 @@ ctx.getRegistry().mustDelete(toDelete);
 ```
 
 
-### Middlewares
+### Middleware
 
 There are some application tasks that are not closely related to the business logic, but must be performed nevertheless, and these are typically repeated from application to application.
-The systems engineering world extracted these repeating tasks and packaged them into self-contained _middlewares._
-Middlewares are fully functional services that are usually application-independent, thus reusable across applications. 
+The systems engineering world extracted these repeating tasks and packaged them into self-contained _middleware._
+Middleware processors are fully functional services that are usually application-independent, thus reusable across applications. 
 
 Hypernate also identified some repeating, application-independent tasks around the Fabric `ChaincodeStub` that might be handy across different projects.
-What’s more, you can chain more middlewares together, similarly to web server middlewares!
-Cherry-pick your middlewares to easily shape the feature set of your chaincode.
+What’s more, you can chain more middleware processors together, similarly to web server middleware!
+Cherry-pick your middleware components to easily shape the feature set of your chaincode.
 
-Currently, the following middlewares are available (with more on the way!):
+Currently, the following middleware processors are available (with more on the way!):
 * `LoggingStubMiddleware`: wraps popular ledger access operations with logging, so you always know what’s happening between your business logic and ledger.
 * `WriteBackCachedStubMiddleware`: implements caching of raw ledger entries to lower the traffic between the chaincode and the peer, and also to support the _read-your-own-write_ data access semantic. 
 
 The following code snippet shows:
-* How to use the `MiddlewareInfo` annotation to construct an _ordered list_ (i.e., a chain) of middlewares. 
+* How to use the `MiddlewareInfo` annotation to construct an _ordered list_ (i.e., a chain) of middleware processors. 
 * How to use the `HypernateContract` base class to automatically take care of processing the annotations and building the corresponding chain.
 
 ```java
