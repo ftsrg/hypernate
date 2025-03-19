@@ -70,7 +70,7 @@ Let's see what happens when we `toString` a few ID-like numbers:
 * Lexicographically ordered keys in Fabric: `"10"`, `"11"`, `"9"`
 
 The issue is evident: the keys do not retain their business semantic (their order) and we lose nice Fabric features like range or partial queries.
-Well, they are still there, but might produce __semantically incorrect__ results if the business logic depends on the enumeration order of keys!
+Well, they are still there, but might produce **semantically incorrect** results if the business logic depends on the enumeration order of keys!
 
 How would you solve this problem? By a smarter `toString` implementation, of course!
 The new implementation should produce the following, order-friendly strings (or something like that):
@@ -130,7 +130,7 @@ public record Asset(
 ```
 
 > [!CAUTION] 
-> This key space design means that you must know __both__ the `owner` and `assetID` values to access (for example, read or delete) an asset on the ledger.
+> This key space design means that you must know **both** the `owner` and `assetID` values to access (for example, read or delete) an asset on the ledger.
 > This is not necessarily optimal, we only did this to support partial queries for the asset.
 > The upcoming **query index definition** capability of Hypernate will solve this problem by automatically managing "query-enabling" key spaces separately from primary key definitions.
 > _So stay tuned for exciting new features!_
@@ -226,5 +226,5 @@ BibTeX:
 
 ## License
 
-Hypernate uses the *Apache License Version 2.0*.
+Hypernate uses the _Apache License Version 2.0_.
 For more information see [NOTICES](NOTICES.md), [MAINTAINERS](MAINTAINERS.md), and [LICENSE](LICENSE).
