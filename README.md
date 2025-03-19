@@ -23,6 +23,8 @@ And more features are on the way, so spoiler ahead:
 * Support for data schemas
 * …
 
+
+
 ## User Guide
 
 For complete examples, please refer to the [hypernate-samples](https://github.com/ftsrg/hypernate-samples) repository.
@@ -35,6 +37,7 @@ The gist of using Hypernate features is the following:
 3. **Use `HypernateContract`** as base class for your business `Contract` implementation to easily gain access to everything Hypernate provides, including its _registry_ and _middleware_ features.
 4. **Use the `Registry`** class to handle the annotated entities in a friendly way.
    The easiest way is to use `HypernateContext` as your transaction `Context` implementation; it takes care of the boring stuff for you.
+
 
 ### Declarative entity keys
 
@@ -135,6 +138,7 @@ public record Asset(
 > The upcoming **query index definition** capability of Hypernate will solve this problem by automatically managing “query-enabling” key spaces separately from primary key definitions.
 > _So stay tuned for exciting new features!_
 
+
 ### CRUD operations
 
 Use an object-oriented `Registry` through the enhanced `HypernateContext` and access your entities easily!
@@ -161,6 +165,7 @@ No more cluttering `if-else` or `try-catch` blocks for every ledger access opera
 Asset toDelete = reg.mustRead(Asset.class, assetID);
 ctx.getRegistry().mustDelete(toDelete);
 ```
+
 
 ### Middlewares
 
@@ -195,6 +200,8 @@ So it is possible that the original stub won’t even get the call, it is served
 > Hypernate context and middleware instances are specific to your individual TX executions/endoresements!
 > Hypernate does not introduce dependencies between TXs, following the traditional (and important!) Fabric chaincode development practice.
 
+
+
 ## Developer Guide
 
 The preferred way of contribution is:
@@ -204,6 +211,8 @@ The preferred way of contribution is:
 3. Make your changes using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary);
 4. Push the branch to your fork;
 5. Create a pull request.
+
+
 
 ## Referencing this work
 
@@ -223,6 +232,8 @@ BibTeX:
   url={https://www.researchsquare.com/article/rs-4606405/latest}
 }
 ```
+
+
 
 ## License
 
