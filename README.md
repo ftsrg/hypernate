@@ -1,9 +1,9 @@
 # Hypernate - an entity framework for Hyperledger Fabric
 
-If Fabric allows you to keep your familiar programming language, then Hypernate will allow you to _keep your familiar programming style_. 
+If Fabric allows you to keep your familiar programming language, then Hypernate will allow you to _keep your familiar programming style._
 
 No more low-level boilerplate code for key-value storage operations and other housekeeping tasks!
-Take advantage of Hypernate's _high abstraction level_, _aspect-oriented_ approaches and _extensibility_ to keep your critical business logic as clean as possible!
+Take advantage of Hypernate's _high abstraction level,_ _aspect-oriented_ approaches and _extensibility_ to keep your critical business logic as clean as possible!
 
 Enhance your chaincode with feaures, like:
 * Object-oriented CRUD (create, read, update, delete) operations with explicit semantics
@@ -165,7 +165,7 @@ ctx.getRegistry().mustDelete(toDelete);
 ### Middlewares
 
 There are some application tasks that are not closely related to the business logic, but must be performed nevertheless, and these are typically repeated from application to application.
-The systems engineering world extracted these repeating tasks and packaged them into self-contained _middlewares_.
+The systems engineering world extracted these repeating tasks and packaged them into self-contained _middlewares._
 Middlewares are fully functional services that are usually application-independent, thus reusable across applications. 
 
 Hypernate also identified some repeating, application-independent tasks around the Fabric `ChaincodeStub` that might be handy across different projects.
