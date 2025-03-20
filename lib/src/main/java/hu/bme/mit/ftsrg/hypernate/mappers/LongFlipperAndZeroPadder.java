@@ -2,6 +2,7 @@
 package hu.bme.mit.ftsrg.hypernate.mappers;
 
 public class LongFlipperAndZeroPadder implements AttributeMapper {
+
   private static final String FORMAT_STRING = "%0" + String.valueOf(Long.MAX_VALUE).length() + "d";
 
   @Override
@@ -10,6 +11,7 @@ public class LongFlipperAndZeroPadder implements AttributeMapper {
       return String.format(LongFlipperAndZeroPadder.FORMAT_STRING, Long.MAX_VALUE - longNumber);
     }
 
-    throw new IllegalArgumentException("The LongFlipperAndZeroPadder attribute mapper only supports positive long number intputs");
+    throw new IllegalArgumentException(
+        "The LongFlipperAndZeroPadder attribute mapper only supports positive long number intputs");
   }
 }
