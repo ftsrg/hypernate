@@ -2,6 +2,7 @@
 package hu.bme.mit.ftsrg.hypernate.mappers;
 
 public class IntegerFlipperAndZeroPadder implements AttributeMapper {
+
   private static final String FORMAT_STRING =
       "%0" + String.valueOf(Integer.MAX_VALUE).length() + "d";
 
@@ -11,6 +12,7 @@ public class IntegerFlipperAndZeroPadder implements AttributeMapper {
       return String.format(IntegerFlipperAndZeroPadder.FORMAT_STRING, Integer.MAX_VALUE - integer);
     }
 
-    throw new IllegalArgumentException("The IntegerFlipperAndZeroPadder attribute mapper only supports positive integer intputs");
+    throw new IllegalArgumentException(
+        "The IntegerFlipperAndZeroPadder attribute mapper only supports positive integer intputs");
   }
 }
